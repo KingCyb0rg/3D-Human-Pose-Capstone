@@ -1,8 +1,7 @@
 # 3D-Human-Pose-Capstone
 
-# Project Teams
-Ryan
-Brandon Townes
+# Project Team Leads
+Ryan Buck and Brandon Townes
 
 ## AR Instructions Team:
 
