@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=D:\bmt81\Documents\Florida Polytechnic\Spring 2024\Senior Design 2\3D-Human-Pose-Capstone\.venv
+set VIRTUAL_ENV=C:\Users\Morzel\Senior Design\3D-Human-Pose-Capstone\.venv
 
 if not defined PROMPT set PROMPT=$P$G
 

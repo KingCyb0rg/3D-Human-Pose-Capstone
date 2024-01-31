@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="D:\bmt81\Documents\Florida Polytechnic\Spring 2024\Senior Design 2\3D-Human-Pose-Capstone\.venv"
+VIRTUAL_ENV="C:\Users\Morzel\Senior Design\3D-Human-Pose-Capstone\.venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
