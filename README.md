@@ -9,4 +9,4 @@ Ryan Buck and Brandon Townes
 ## 3D Model Generation Team
 
 
-## Messurment Extractions Team 
+## Measurement Extractions Team 
