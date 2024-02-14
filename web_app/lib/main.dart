@@ -11,15 +11,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: '3D Model Web Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.purple,
       ),
       home: MyHomePage(title: '3D Model Web App Demo'),
@@ -27,49 +18,82 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             TextButton(
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.purpleAccent),
-                  foregroundColor:
-                      MaterialStateProperty.all<Color>(Colors.white),
-                  padding:
-                      MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(25)),
-                ),
-                onPressed: () {},
-                child: Text('Start Scan'))
+                style: defaultButtonStyle(),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const ScanningPage(title: "Scanner Environment");
+                  }));
+                },
+                child: Text('Start Scan')),
+            SizedBox(height: 15),
+            TextButton(
+                style: defaultButtonStyle(),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const ViewModelPage(title: "3D Render Viewer");
+                  }));
+                },
+                child: Text('View 3D Render'))
           ],
         ),
       ),
     );
   }
 }
+
+class ScanningPage extends StatelessWidget {
+  const ScanningPage({Key? key, required this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          children: [
+            Text("Scanning Environment goes here!"),
+            SizedBox(height: 15),
+            TextButton(onPressed: () {
+              Navigator.pop(context)
+            }), child: child)
+
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ViewModelPage extends StatelessWidget {
+  const ViewModelPage({Key? key, required this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text("3D Render goes here!"),
+      ),
+    );
+  }
+}
+
+ButtonStyle defaultButtonStyle() => ButtonStyle(
+      backgroundColor: MaterialStateProperty.all<Color>(Colors.purpleAccent),
+      foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+      padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(25)),
+    );
