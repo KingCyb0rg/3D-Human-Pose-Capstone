@@ -63,13 +63,15 @@ class ScanningPage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text("Scanning Environment goes here!"),
             SizedBox(height: 15),
-            TextButton(onPressed: () {
-              Navigator.pop(context)
-            }), child: child)
-
+            BackButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
           ],
         ),
       ),
@@ -86,7 +88,18 @@ class ViewModelPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text("3D Render goes here!"),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("3D Render goes here!"),
+            SizedBox(height: 15),
+            BackButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
