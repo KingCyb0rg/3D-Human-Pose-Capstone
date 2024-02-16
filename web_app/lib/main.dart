@@ -25,29 +25,40 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextButton(
-                style: defaultButtonStyle(),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const ScanningPage(title: "Scanner Environment");
-                  }));
-                },
-                child: Text('Start Scan')),
-            SizedBox(height: 15),
-            TextButton(
-                style: defaultButtonStyle(),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const ViewModelPage(title: "3D Render Viewer");
-                  }));
-                },
-                child: Text('View 3D Render'))
-          ],
-        ),
+      body: Stack(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage("assets/images/tylmen_splash.jpg"))),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextButton(
+                    style: defaultButtonStyle(),
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return const ScanningPage(title: "Scanner Environment");
+                      }));
+                    },
+                    child: Text('Start Scan')),
+                SizedBox(height: 15),
+                TextButton(
+                    style: defaultButtonStyle(),
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return const ViewModelPage(title: "3D Render Viewer");
+                      }));
+                    },
+                    child: Text('View 3D Render'))
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
