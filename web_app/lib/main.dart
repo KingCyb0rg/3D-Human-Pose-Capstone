@@ -63,14 +63,30 @@ class ScanningPage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Scanning Environment goes here!"),
-            SizedBox(height: 15),
-            BackButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+            Container(
+              alignment: Alignment.topLeft,
+              padding: EdgeInsets.all(10),
+              clipBehavior: Clip.hardEdge,
+              decoration: defaultBoxDecoration(),
+              child: BackButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+            new Image.asset('images/IMG_1.jpg', width: 500, height: 750),
+            Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(10),
+              clipBehavior: Clip.hardEdge,
+              decoration: defaultBoxDecoration(),
+              child: ElevatedButton(
+                child: const Text('Start'),
+                onPressed: () {},
+                style: defaultButtonStyle(),
+              ),
             ),
           ],
         ),
@@ -109,4 +125,12 @@ ButtonStyle defaultButtonStyle() => ButtonStyle(
       backgroundColor: MaterialStateProperty.all<Color>(Colors.purpleAccent),
       foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
       padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(25)),
+      // minimumSize: MaterialStateProperty.all<Size>(Size.fromWidth(25))
     );
+
+BoxDecoration defaultBoxDecoration() => BoxDecoration(
+    color: Colors.purple,
+    border: Border.all(
+      color: Colors.black,
+      style: BorderStyle.solid,
+    ));
