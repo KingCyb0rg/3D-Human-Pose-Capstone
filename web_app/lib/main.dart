@@ -4,8 +4,13 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,10 +23,15 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,10 +74,71 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
-class ScanningPage extends StatelessWidget {
+class ScanningPage extends StatefulWidget {
   const ScanningPage({Key? key, required this.title}) : super(key: key);
 
   final String title;
+
+  @override
+  _ScanningPageState createState() => _ScanningPageState();
+}
+
+class _ScanningPageState extends State<ScanningPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              alignment: Alignment.topLeft,
+              padding: EdgeInsets.all(10),
+              clipBehavior: Clip.hardEdge,
+              decoration: defaultBoxDecoration(),
+              child: BackButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+            // AR environment placeholder
+            Expanded(
+              child: Container(
+                alignment: Alignment.center,
+                child: Text('OpenCV enviroment goes '),
+              ),
+            ),
+            Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(10),
+              clipBehavior: Clip.hardEdge,
+              decoration: defaultBoxDecoration(),
+              child: ElevatedButton(
+                child: const Text('Start'),
+                onPressed: () {},
+                style: defaultButtonStyle(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ViewModelPage extends StatefulWidget {
+  const ViewModelPage({Key? key, required this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  _ViewModelPageState createState() => _ViewModelPageState();
+}
+
+class _ViewModelPageState extends State<ViewModelPage> {
+  @override
+  
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +158,13 @@ class ScanningPage extends StatelessWidget {
                 },
               ),
             ),
-            new Image.asset('images/IMG_1.jpg', width: 500, height: 750),
+            // Model viewer environment placeholder
+            Expanded(
+              child: Container(
+                alignment: Alignment.center,
+                child: Text('Model view goes HERE!!!!'),
+              ),
+            ),
             Container(
               alignment: Alignment.center,
               padding: EdgeInsets.all(10),
@@ -106,37 +183,10 @@ class ScanningPage extends StatelessWidget {
   }
 }
 
-class ViewModelPage extends StatelessWidget {
-  const ViewModelPage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("3D Render goes here!"),
-            SizedBox(height: 15),
-            BackButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 ButtonStyle defaultButtonStyle() => ButtonStyle(
       backgroundColor: MaterialStateProperty.all<Color>(Colors.purpleAccent),
       foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
       padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(25)),
-      // minimumSize: MaterialStateProperty.all<Size>(Size.fromWidth(25))
     );
 
 BoxDecoration defaultBoxDecoration() => BoxDecoration(
