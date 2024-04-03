@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_web_view/easy_web_view.dart';
 
 void main() {
   runApp(MyApp());
@@ -85,6 +86,28 @@ class ScanningPage extends StatefulWidget {
 
 class _ScanningPageState extends State<ScanningPage> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      await showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => new AlertDialog(
+                title: new Text("Scanning Setup"),
+                content: new Text(
+                    "Please confirm that you are outdoors before starting the scan."),
+                backgroundColor: Colors.grey,
+                actions: <Widget>[
+                  new TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: new Text("Yes")),
+                ],
+              ));
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
@@ -104,9 +127,12 @@ class _ScanningPageState extends State<ScanningPage> {
             ),
             // AR environment placeholder
             Expanded(
-              child: Container(
-                alignment: Alignment.center,
-                child: Text('OpenCV enviroment goes '),
+              child: EasyWebView(
+                src: ScanHTML,
+                isMarkdown: false,
+                convertToWidgets: true,
+                width: 450,
+                height: 600,
               ),
             ),
             Container(
@@ -137,9 +163,6 @@ class ViewModelPage extends StatefulWidget {
 }
 
 class _ViewModelPageState extends State<ViewModelPage> {
-  @override
-  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,3 +218,16 @@ BoxDecoration defaultBoxDecoration() => BoxDecoration(
       color: Colors.black,
       style: BorderStyle.solid,
     ));
+
+String get ScanHTML => """
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=”UTF-8">
+<meta content=”IE=Edge” http-equiv=”X-UA-Compatible”>
+</head>
+<body>
+<p>Please Work, Please Work, Please Work</p>
+</body>
+</html>
+""";
