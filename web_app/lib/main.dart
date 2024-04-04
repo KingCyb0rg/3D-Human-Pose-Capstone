@@ -227,6 +227,7 @@ String get openCVHTML => '''
 </head>
 <body>
 <p>Please Work, Please Work, Please Work</p>
+<video id="vidInput"></video>
 </body>
 </html>
 ''';
