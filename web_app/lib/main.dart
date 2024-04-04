@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:easy_web_view/easy_web_view.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 void main() {
   runApp(MyApp());
@@ -88,7 +88,7 @@ class _ScanningPageState extends State<ScanningPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await showDialog<String>(
           context: context,
           builder: (BuildContext context) => new AlertDialog(
@@ -110,6 +110,7 @@ class _ScanningPageState extends State<ScanningPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MaterialStateColor.transparent,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -127,13 +128,11 @@ class _ScanningPageState extends State<ScanningPage> {
             ),
             // AR environment placeholder
             Expanded(
-              child: EasyWebView(
-                src: ScanHTML,
-                isMarkdown: false,
-                convertToWidgets: true,
-                width: 450,
-                height: 600,
-              ),
+              child: Container(
+                  alignment: Alignment.center,
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: HtmlWidget(openCVHTML)),
             ),
             Container(
               alignment: Alignment.center,
@@ -219,7 +218,7 @@ BoxDecoration defaultBoxDecoration() => BoxDecoration(
       style: BorderStyle.solid,
     ));
 
-String get ScanHTML => """
+String get openCVHTML => '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -230,4 +229,4 @@ String get ScanHTML => """
 <p>Please Work, Please Work, Please Work</p>
 </body>
 </html>
-""";
+''';
