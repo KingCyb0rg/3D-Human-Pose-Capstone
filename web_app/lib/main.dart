@@ -110,7 +110,6 @@ class _ScanningPageState extends State<ScanningPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MaterialStateColor.transparent,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -128,11 +127,13 @@ class _ScanningPageState extends State<ScanningPage> {
             ),
             // AR environment placeholder
             Expanded(
-              child: Container(
-                  alignment: Alignment.center,
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: HtmlWidget(openCVHTML)),
+              child: Center(
+                child: Container(
+                    padding: EdgeInsets.all(5),
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: HtmlWidget(openCVHTML)),
+              ),
             ),
             Container(
               alignment: Alignment.center,
@@ -224,9 +225,13 @@ String get openCVHTML => '''
 <head>
 <meta charset=”UTF-8">
 <meta content=”IE=Edge” http-equiv=”X-UA-Compatible”>
+<style>
+p {text-align: center}
+</style>
 </head>
 <body>
-<p>Please Work, Please Work, Please Work</p>
+<h1>It Worked!!!</h1>
+<p>I can rest now :)</p>
 <video id="vidInput"></video>
 </body>
 </html>
