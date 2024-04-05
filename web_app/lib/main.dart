@@ -1,5 +1,7 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'dart:js' as js;
 
 void main() {
@@ -113,46 +115,46 @@ class _ScanningPageState extends State<ScanningPage> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              alignment: Alignment.topLeft,
-              padding: EdgeInsets.all(10),
-              clipBehavior: Clip.hardEdge,
-              decoration: defaultBoxDecoration(),
-              child: BackButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                alignment: Alignment.topLeft,
+                padding: EdgeInsets.all(10),
+                clipBehavior: Clip.hardEdge,
+                decoration: defaultBoxDecoration(),
+                child: BackButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
               ),
-            ),
-            // AR environment placeholder
-            Expanded(
-              child: Center(
-                child: Container(
+              // AR environment placeholder
+              Expanded(
+                child: Center(
+                  child: Container(
                     padding: EdgeInsets.all(5),
                     width: double.infinity,
                     height: double.infinity,
-                    child: Html(data: openCVHTML)),
+                    child: createWebView(),
+                  ),
+                ),
               ),
-            ),
-            Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(10),
-              clipBehavior: Clip.hardEdge,
-              decoration: defaultBoxDecoration(),
-              child: ElevatedButton(
-                child: const Text('Start'),
-                onPressed: () {
-                  setState(() {
-                    js.context.callMethod('startCapture');
-                  });
-                },
-                style: defaultButtonStyle(),
+              Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(10),
+                clipBehavior: Clip.hardEdge,
+                decoration: defaultBoxDecoration(),
+                child: ElevatedButton(
+                  child: const Text('Start'),
+                  onPressed: () {
+                    setState(() {
+                      js.context.callMethod('startCapture');
+                    });
+                  },
+                  style: defaultButtonStyle(),
+                ),
               ),
-            ),
-          ],
-        ),
+            ]),
       ),
     );
   }
@@ -211,6 +213,29 @@ class _ViewModelPageState extends State<ViewModelPage> {
   }
 }
 
+Widget createWebView() {
+  return InAppWebView(
+    initialFile: "web/opencv.html",
+    initialUserScripts: UnmodifiableListView<UserScript>(
+      [
+        UserScript(
+          source: 'web/scannerapp.js',
+          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+        )
+      ],
+    ),
+    initialSettings: InAppWebViewSettings(
+      javaScriptEnabled: true,
+      useOnLoadResource: false,
+      verticalScrollBarEnabled: false,
+      horizontalScrollBarEnabled: false,
+      disableHorizontalScroll: true,
+      disableVerticalScroll: true,
+      useWideViewPort: false,
+    ),
+  );
+}
+
 ButtonStyle defaultButtonStyle() => ButtonStyle(
       backgroundColor: MaterialStateProperty.all<Color>(Colors.purpleAccent),
       foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
@@ -223,25 +248,3 @@ BoxDecoration defaultBoxDecoration() => BoxDecoration(
       color: Colors.black,
       style: BorderStyle.solid,
     ));
-
-String get openCVHTML => '''
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Capture with OpenCV.js</title>
-</head>
-<body>
-    <video id="videoInput" autoplay></video>
-    <canvas id="canvasFrame" width="640" height="480"></canvas>
-    <canvas id="canvasOutput" width="640" height="480"></canvas>
-
-    <!-- Load OpenCV.js -->
-    <script src="https://docs.opencv.org/4.5.5/opencv.js"></script>
-
-    <!-- Your JavaScript code goes here -->
-    <script src="web/scannerapp.js"></script>
-</body>
-</html>
-''';

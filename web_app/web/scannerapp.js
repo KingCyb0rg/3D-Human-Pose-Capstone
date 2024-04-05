@@ -1,23 +1,21 @@
-// Constants
-const videoInput = document.getElementById("videoInput");
+// Initialize OpenCV.js
+const FPS = 30;
 const canvasFrame = document.getElementById("canvasFrame");
 const canvasOutput = document.getElementById("canvasOutput");
-const FPS = 30;
-
-// Initialize OpenCV.js
-cv['onRuntimeInitialized'] = () => {
-    startCapture();
-};
+// cv['onRuntimeInitialized'] = () => {
+//     startCapture();
+// };
 
 // Function to start capturing video
 function startCapture() {
+    const videoInput = document.getElementById("videoInput");
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-        .then(function(stream) {
+        .then(function (stream) {
             videoInput.srcObject = stream;
             videoInput.play();
             processVideo();
         })
-        .catch(function(err) {
+        .catch(function (err) {
             console.log("An error occurred! " + err);
         });
 }
