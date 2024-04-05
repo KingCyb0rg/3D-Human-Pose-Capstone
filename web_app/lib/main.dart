@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'dart:js' as js;
 
 void main() {
   runApp(MyApp());
@@ -132,7 +133,7 @@ class _ScanningPageState extends State<ScanningPage> {
                     padding: EdgeInsets.all(5),
                     width: double.infinity,
                     height: double.infinity,
-                    child: HtmlWidget(openCVHTML)),
+                    child: Html(data: openCVHTML)),
               ),
             ),
             Container(
@@ -142,7 +143,11 @@ class _ScanningPageState extends State<ScanningPage> {
               decoration: defaultBoxDecoration(),
               child: ElevatedButton(
                 child: const Text('Start'),
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    js.context.callMethod('startCapture');
+                  });
+                },
                 style: defaultButtonStyle(),
               ),
             ),
@@ -221,18 +226,22 @@ BoxDecoration defaultBoxDecoration() => BoxDecoration(
 
 String get openCVHTML => '''
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset=”UTF-8">
-<meta content=”IE=Edge” http-equiv=”X-UA-Compatible”>
-<style>
-p {text-align: center}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Capture with OpenCV.js</title>
 </head>
 <body>
-<h1>It Worked!!!</h1>
-<p>I can rest now :)</p>
-<video id="vidInput"></video>
+    <video id="videoInput" autoplay></video>
+    <canvas id="canvasFrame" width="640" height="480"></canvas>
+    <canvas id="canvasOutput" width="640" height="480"></canvas>
+
+    <!-- Load OpenCV.js -->
+    <script src="https://docs.opencv.org/4.5.5/opencv.js"></script>
+
+    <!-- Your JavaScript code goes here -->
+    <script src="web/scannerapp.js"></script>
 </body>
 </html>
 ''';
