@@ -13,10 +13,12 @@ pc = cloud_denoise(pc)
 
 height, wingspan, height_points, wingspan_points = dataExtract(pc)
 
-# Draws pc with measurement to see if everything is correct.
-# Comment this out for final build
+# Replace with function that sends this data to web app
 print(
     f"Height: {height} units\n" +
     f"Wingspan: {wingspan} units"
 )
+
+# Draws pc with measurement to see if everything is correct.
+# Comment this out for final build
 drawMeasurements(pc, height_points, wingspan_points)
