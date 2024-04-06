@@ -4,6 +4,7 @@ import numpy as np
 from data_extraction import *
 from ModelGenFunctions import *
 
+# Temporary for testing. Replace with point cloud sent from web
 pc = o3d.io.read_point_cloud("point-cloud-example/brandon-5_8_slow.ply")
 
 pc = cut_floor(pc)
