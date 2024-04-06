@@ -3,7 +3,7 @@ import numpy as np
 
 # Input Pointcloud object  Output: Returns height and width float, topPoint and bottomPoint list, leftPoint and rightPoint list
 # Extracts height and width from a pointcloud
-def dataExtract(pointcloud):
+def dataExtract(pointcloud, threshold=8):
 
     # Input: Pointcloud object  Output: top and bottom cooridnates float, and height float
     def getHeight(pointcloud):
@@ -16,15 +16,15 @@ def dataExtract(pointcloud):
         return sorted_vertices[-1].tolist(), sorted_vertices[0].tolist(), height
 
     # Input: Pointcloud object  Output: top and bottom cooridnates float, and height float
-    def getWidth(pointcloud):
+    def getWingSpan(pointcloud):
         vertices =  np.asarray(pointcloud.points)
 
         # Sorts by x axis coordinate
         sorted_vertices_x = vertices[vertices[:, 0].argsort()]
-        width_x = sorted_vertices_x[-1][1] - sorted_vertices_x[0][1]
-
+        width_x = sorted_vertices_x[-1][0] - sorted_vertices_x[0][0]
+        # Sorts by z axis coordinate
         sorted_vertices_z = vertices[vertices[:, 2].argsort()]
-        width_z = sorted_vertices_z[-1][1] - sorted_vertices_z[0][1]
+        width_z = sorted_vertices_z[-1][2] - sorted_vertices_z[0][2]
 
         if (width_x > width_z):
             width = width_x
@@ -33,21 +33,30 @@ def dataExtract(pointcloud):
             width = width_z
             sorted_vertices = sorted_vertices_z
 
-        width = sorted_vertices[-1][1] - sorted_vertices[0][1]
         return sorted_vertices[-1].tolist(), sorted_vertices[0].tolist(), width
+    
+    def getWaist(pointcloud, ylimit_point, threshold):
+        # AHH
+        return
     
     # Rotates point cloud to correct orientation for measurements
     # May cause program to break if point cloud generation methods change
     rotation = pointcloud.get_rotation_matrix_from_xyz((-np.pi / 2, 0, -np.pi / 2))
     pointcloud.rotate(rotation)
 
+    
+    
     topPoint, bottomPoint, height = getHeight(pointcloud)
-    leftPoint, rightPoint, width = getWidth(pointcloud)
+    leftPoint, rightPoint, wingspan = getWingSpan(pointcloud)
 
-    return height, width, [topPoint, bottomPoint], [leftPoint, rightPoint]
+    threshold = height/threshold
+
+    #waistPoint1, waistPoint2, waistWidth = getWaist(pointcloud, leftPoint, threshold)
+
+    return height, wingspan, [topPoint, bottomPoint], [leftPoint, rightPoint]
 
 
-def drawMeasurements(pointcloud, height, width, height_points, width_points):
+def drawMeasurements(pointcloud, height_points, width_points):
 
     # Top sphere to show topmost point
     sphereTop = o3d.geometry.TriangleMesh.create_sphere().translate(height_points[0], relative = False)
