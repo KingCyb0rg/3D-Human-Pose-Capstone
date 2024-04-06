@@ -36,36 +36,34 @@ def cloud_denoise(cloud, passes = 5):
     if(passes <= 0):
         print("Denoise started with zero passes, aborting")
     if(passes >= 1):
-        print("Initial Count " + (np.asarray(cloud.points).size)/3 + " Points")
-        denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=15,
+        #print("Initial Count " + (np.asarray(cloud.points).size)/3 + " Points")
+        denoise_cloud, ind = cloud.remove_statistical_outlier(nb_neighbors=15,
                                                         std_ratio=1.9)
-        print("Pass 1: " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
+        #print("Pass 1: " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
     if(passes >= 2):
         denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=20,
                                                         std_ratio=1.7)
-        print("Pass 2: " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
+        #print("Pass 2: " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
     if(passes >= 3):
         denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=25,
                                                         std_ratio=1.6)
-        print("Pass 3: " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
+        #print("Pass 3: " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
     if(passes >= 4):
         denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=100,
                                                         std_ratio=1.2)
-        print("Pass 4: " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
+        #print("Pass 4: " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
     if(passes >= 5):
         denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=85,
                                                         std_ratio=1.3)
-        print("Pass 5: " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
+        #print("Pass 5: " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
     if(passes > 5):
         for x in range(passes - 5):
             denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=30,
                                                             std_ratio=1.5)
-            print("Pass " + x +": " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
-    if(passes < 0):
-        print("Denoise Complete")
-        return denoise_cloud
-    else:
-        return 0
+            #print("Pass " + x +": " + (np.asarray(denoise_cloud.points).size)/3 + " Points")
+
+    print("Denoise Complete")
+    return denoise_cloud
 
 #
 # generate_mesh: takes open3d.geometry.PointCloud, an integer, and a bool, returns open3d.geometry.TriangleMesh
