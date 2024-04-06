@@ -18,7 +18,9 @@ print(
     f"Height: {height} units\n" +
     f"Wingspan: {wingspan} units"
 )
+mesh = generate_mesh(pc)
 
 # Draws pc with measurement to see if everything is correct.
 # Comment this out for final build
 drawMeasurements(pc, height_points, wingspan_points)
+#o3d.visualization.draw_geometries([mesh])
