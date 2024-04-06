@@ -80,7 +80,7 @@ def generate_mesh(cloud, depth = 7, experimental_clean=False):
     d = 7
     reconstructed_mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(cloud, depth=d, linear_fit=True)
     print("Generation Complete") 
-    if(experimental_clean = True):
+    if(experimental_clean == True):
         meshbounds = np.asarray(reconstructed_mesh.get_axis_aligned_bounding_box().get_box_points())
         meshbounds = meshbounds[meshbounds[:,2].argsort()]
         for i in range(4):
