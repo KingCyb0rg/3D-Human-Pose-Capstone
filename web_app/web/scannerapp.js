@@ -3,6 +3,7 @@ cv['onRuntimeInitialized'] = () => {
     startCapture();
 };
 
+const videoInput = null;
 // Function to start capturing video
 function startCapture() {
     const videoInput = document.getElementById("videoInput");

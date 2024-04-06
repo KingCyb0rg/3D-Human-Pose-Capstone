@@ -5,18 +5,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Capture with OpenCV.js</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        @media screen and (min-width: 621px){
+            video, canvas {
+                width: 620px;
+            }
+        }
+        @media screen and (max-width: 620px){
+        video, canvas {
+            display: block;
+            margin: auto;
+            width: auto;
+            height: auto;
+        }
+    }
+        
+    </style>
 </head>
 
 <body>
     <video id="videoInput" preload="auto" type="/video/mp4"></video>
-    <canvas id="canvasFrame" width="620" height="480"></canvas>
-    <canvas id="canvasOutput" width="620" height="480"></canvas>
+    <canvas id="canvasFrame" ></canvas>
+    <canvas id="canvasOutput"></canvas>
+
     <!-- Load OpenCV.js -->
     <script src="https://docs.opencv.org/4.5.5/opencv.js"></script>
     <!-- Your JavaScript code goes here -->
     <script src="/web/scannerapp.js"></script>
-
-
 </body>
 
 </html>

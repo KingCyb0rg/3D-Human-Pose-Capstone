@@ -131,7 +131,7 @@ class _ScanningPageState extends State<ScanningPage> {
               Expanded(
                 child: Center(
                   child: Container(
-                    padding: EdgeInsets.all(5),
+                    padding: EdgeInsets.all(0),
                     width: double.infinity,
                     height: double.infinity,
                     child: FutureBuilder<InAppWebView>(
@@ -140,7 +140,16 @@ class _ScanningPageState extends State<ScanningPage> {
                         if (snapshot.hasData)
                           return snapshot.requireData;
                         else
-                          return LinearProgressIndicator();
+                          return Center(
+                            child: SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: CircularProgressIndicator(
+                                  valueColor:
+                                      AlwaysStoppedAnimation(Colors.purpleAccent),
+                                  strokeWidth: 5,
+                                )),
+                          );
                       },
                     ),
                   ),
