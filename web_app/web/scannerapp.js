@@ -1,10 +1,7 @@
 // Initialize OpenCV.js
-const FPS = 30;
-const canvasFrame = document.getElementById("canvasFrame");
-const canvasOutput = document.getElementById("canvasOutput");
-// cv['onRuntimeInitialized'] = () => {
-//     startCapture();
-// };
+cv['onRuntimeInitialized'] = () => {
+    startCapture();
+};
 
 // Function to start capturing video
 function startCapture() {

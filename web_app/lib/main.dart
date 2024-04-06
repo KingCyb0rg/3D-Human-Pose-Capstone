@@ -1,5 +1,4 @@
 import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'dart:js' as js;
@@ -44,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Container(
             decoration: BoxDecoration(
                 image: DecorationImage(
-                    image: AssetImage("assets/images/tylmen_splash.jpg"))),
+                    image: AssetImage("images/tylmen_splash.jpg"))),
           ),
           Center(
             child: Column(
@@ -135,7 +134,15 @@ class _ScanningPageState extends State<ScanningPage> {
                     padding: EdgeInsets.all(5),
                     width: double.infinity,
                     height: double.infinity,
-                    child: createWebView(),
+                    child: FutureBuilder<InAppWebView>(
+                      future: callAsyncWebView(),
+                      builder: (context, AsyncSnapshot<InAppWebView> snapshot) {
+                        if (snapshot.hasData)
+                          return snapshot.requireData;
+                        else
+                          return LinearProgressIndicator();
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -213,14 +220,17 @@ class _ViewModelPageState extends State<ViewModelPage> {
   }
 }
 
-Widget createWebView() {
+Future<InAppWebView> callAsyncWebView() async =>
+    await Future.delayed(Duration(seconds: 2), () => createWebView());
+
+InAppWebView createWebView() {
   return InAppWebView(
     initialFile: "web/opencv.html",
     initialUserScripts: UnmodifiableListView<UserScript>(
       [
         UserScript(
           source: 'web/scannerapp.js',
-          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
         )
       ],
     ),
