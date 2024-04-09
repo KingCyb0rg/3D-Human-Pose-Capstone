@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'dart:js' as js;
 
@@ -19,7 +20,15 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: '3D Model Web Demo',
       theme: ThemeData(
+        useMaterial3: true,
         primarySwatch: Colors.purple,
+        textButtonTheme: TextButtonThemeData(
+            style: ButtonStyle(
+          backgroundColor:
+              MaterialStateProperty.all<Color>(Colors.purpleAccent),
+          foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+          padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(25)),
+        )),
       ),
       home: MyHomePage(title: '3D Model Web App Demo'),
     );
@@ -37,40 +46,50 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage("images/tylmen_splash.jpg"))),
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                TextButton(
-                    style: defaultButtonStyle(),
-                    onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return const ScanningPage(title: "Scanner Environment");
-                      }));
-                    },
-                    child: Text('Start Scan')),
-                SizedBox(height: 15),
-                TextButton(
-                    style: defaultButtonStyle(),
-                    onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return const ViewModelPage(title: "3D Render Viewer");
-                      }));
-                    },
-                    child: Text('View 3D Render'))
-              ],
+            child: new Text(
+              "3D Model Creator Demo",
+              style: Theme.of(context).textTheme.headlineLarge,
             ),
           ),
+          SizedBox(height: 50),
+          new Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage("images/tylmen_splash.jpg")))),
+          TextButton(
+              style: Theme.of(context).textButtonTheme.style,
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return const ScanningPage(title: "Scanner Environment");
+                }));
+              },
+              child: Text('Start Scan')),
+          SizedBox(
+            height: 10,
+          ),
+          TextButton(
+              style: Theme.of(context).textButtonTheme.style,
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return const ViewModelPage(title: "3D Render Viewer");
+                }));
+              },
+              child: Text('View 3D Render')),
+          SizedBox(
+            height: 10,
+          ),
+          TextButton(
+              style: Theme.of(context).textButtonTheme.style,
+              onPressed: () {
+                SystemNavigator.pop();
+              },
+              child: new Text("Exit")),
         ],
       ),
     );
@@ -97,7 +116,7 @@ class _ScanningPageState extends State<ScanningPage> {
                 title: new Text("Scanning Setup"),
                 content: new Text(
                     "Please confirm that you are outdoors before starting the scan."),
-                backgroundColor: Colors.grey,
+                backgroundColor: Colors.white,
                 actions: <Widget>[
                   new TextButton(
                       onPressed: () {
@@ -112,6 +131,7 @@ class _ScanningPageState extends State<ScanningPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey,
       body: Center(
         child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -121,17 +141,27 @@ class _ScanningPageState extends State<ScanningPage> {
                 padding: EdgeInsets.all(10),
                 clipBehavior: Clip.hardEdge,
                 decoration: defaultBoxDecoration(),
-                child: BackButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BackButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      color: Colors.black,
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: new Icon(Icons.help_outline),
+                      color: Colors.black,
+                    ),
+                  ],
                 ),
               ),
-              // AR environment placeholder
               Expanded(
                 child: Center(
-                  child: Container(
-                    padding: EdgeInsets.all(0),
+                  child: SizedBox(
                     width: double.infinity,
                     height: double.infinity,
                     child: FutureBuilder<InAppWebView>(
@@ -145,8 +175,8 @@ class _ScanningPageState extends State<ScanningPage> {
                                 width: 50,
                                 height: 50,
                                 child: CircularProgressIndicator(
-                                  valueColor:
-                                      AlwaysStoppedAnimation(Colors.purpleAccent),
+                                  valueColor: AlwaysStoppedAnimation(
+                                      Colors.purpleAccent),
                                   strokeWidth: 5,
                                 )),
                           );
@@ -167,7 +197,7 @@ class _ScanningPageState extends State<ScanningPage> {
                       js.context.callMethod('startCapture');
                     });
                   },
-                  style: defaultButtonStyle(),
+                  style: Theme.of(context).textButtonTheme.style,
                 ),
               ),
             ]),
@@ -189,26 +219,31 @@ class _ViewModelPageState extends State<ViewModelPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
               alignment: Alignment.topLeft,
-              padding: EdgeInsets.all(10),
               clipBehavior: Clip.hardEdge,
               decoration: defaultBoxDecoration(),
               child: BackButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
+                color: Colors.black
               ),
             ),
             // Model viewer environment placeholder
             Expanded(
               child: Container(
                 alignment: Alignment.center,
-                child: Text('Model view goes HERE!!!!'),
+                child: new Icon(
+                  Icons.construction,
+                  size: 50,
+                  color: Colors.purple,
+                ),
               ),
             ),
             Container(
@@ -218,8 +253,24 @@ class _ViewModelPageState extends State<ViewModelPage> {
               decoration: defaultBoxDecoration(),
               child: ElevatedButton(
                 child: const Text('Start'),
-                onPressed: () {},
-                style: defaultButtonStyle(),
+                onPressed: () async {
+                  await showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) => new AlertDialog(
+                            title: new Text("Work In Progress View"),
+                            icon: Icon(Icons.warning, color: Colors.black),
+                            content: new Text(
+                                "Model Viewer is currently under development! Thank you for your patience!"),
+                            actions: <Widget>[
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: new Text("OK"))
+                            ],
+                          ));
+                },
+                style: Theme.of(context).textButtonTheme.style,
               ),
             ),
           ],
@@ -230,7 +281,7 @@ class _ViewModelPageState extends State<ViewModelPage> {
 }
 
 Future<InAppWebView> callAsyncWebView() async =>
-    await Future.delayed(Duration(seconds: 2), () => createWebView());
+    await Future.delayed(Duration(seconds: 3), () => createWebView());
 
 InAppWebView createWebView() {
   return InAppWebView(
@@ -254,12 +305,6 @@ InAppWebView createWebView() {
     ),
   );
 }
-
-ButtonStyle defaultButtonStyle() => ButtonStyle(
-      backgroundColor: MaterialStateProperty.all<Color>(Colors.purpleAccent),
-      foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-      padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(25)),
-    );
 
 BoxDecoration defaultBoxDecoration() => BoxDecoration(
     color: Colors.purple,
