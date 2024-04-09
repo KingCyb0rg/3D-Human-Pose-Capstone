@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer>var exports = {};</script>
+  <script type="module" src="ScannerApp.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js" crossorigin="anonymous"></script>
+  <title>Document</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    #video-container {
+      display: inline-block;
+      width: 1280;
+      height: 720;
+      margin: 0 auto;
+      position: relative;
+    }
+    video {
+      position: absolute;
+      z-index: 1;
+    }
+    canvas {
+      position: relative;
+      z-index: 20;
+    }
+    @media screen and (min-width: 621px) {
+
+      video
+      {
+        width: 620px;
+      }
+    }
+
+    @media screen and (max-width: 620px) {
+
+      video
+      {
+        display: block;
+        margin: auto;
+        width: auto;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="liveView" class="videoView">
+    <div id="video-container">
+      <video id="webcam" class="center" autoplay></video>
+      <canvas class="output_canvas, center" id="output_canvas" width="1280" height="720"></canvas>
+    </div>
+  </div>
+</body>
+
+</html>

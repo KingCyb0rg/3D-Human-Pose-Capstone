@@ -106,6 +106,32 @@ class ScanningPage extends StatefulWidget {
 }
 
 class _ScanningPageState extends State<ScanningPage> {
+  InAppWebView createWebView() {
+    return InAppWebView(
+      initialFile: "web/ScannerApp.html",
+      initialUserScripts: UnmodifiableListView<UserScript>(
+        [
+          UserScript(
+            source: 'web/ScannerApp.js',
+            injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
+          )
+        ],
+      ),
+      initialSettings: InAppWebViewSettings(
+        javaScriptEnabled: true,
+        useOnLoadResource: true,
+        verticalScrollBarEnabled: false,
+        horizontalScrollBarEnabled: false,
+        disableHorizontalScroll: true,
+        disableVerticalScroll: true,
+        useWideViewPort: false,
+      ),
+    );
+  }
+
+  Future<InAppWebView> callAsyncWebView() async =>
+      await Future.delayed(Duration(seconds: 3), () => createWebView());
+
   @override
   void initState() {
     super.initState();
@@ -194,7 +220,7 @@ class _ScanningPageState extends State<ScanningPage> {
                   child: const Text('Start'),
                   onPressed: () {
                     setState(() {
-                      js.context.callMethod('startCapture');
+                      js.context.callMethod('start');
                     });
                   },
                   style: Theme.of(context).textButtonTheme.style,
@@ -229,11 +255,10 @@ class _ViewModelPageState extends State<ViewModelPage> {
               clipBehavior: Clip.hardEdge,
               decoration: defaultBoxDecoration(),
               child: BackButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                color: Colors.black
-              ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  color: Colors.black),
             ),
             // Model viewer environment placeholder
             Expanded(
@@ -278,32 +303,6 @@ class _ViewModelPageState extends State<ViewModelPage> {
       ),
     );
   }
-}
-
-Future<InAppWebView> callAsyncWebView() async =>
-    await Future.delayed(Duration(seconds: 3), () => createWebView());
-
-InAppWebView createWebView() {
-  return InAppWebView(
-    initialFile: "web/opencv.html",
-    initialUserScripts: UnmodifiableListView<UserScript>(
-      [
-        UserScript(
-          source: 'web/scannerapp.js',
-          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
-        )
-      ],
-    ),
-    initialSettings: InAppWebViewSettings(
-      javaScriptEnabled: true,
-      useOnLoadResource: false,
-      verticalScrollBarEnabled: false,
-      horizontalScrollBarEnabled: false,
-      disableHorizontalScroll: true,
-      disableVerticalScroll: true,
-      useWideViewPort: false,
-    ),
-  );
 }
 
 BoxDecoration defaultBoxDecoration() => BoxDecoration(
