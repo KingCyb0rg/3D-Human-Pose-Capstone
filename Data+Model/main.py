@@ -1,16 +1,31 @@
 import open3d as o3d
 import numpy as np
 
-from data_extraction import *
-from ModelGenFunctions import *
+from ModelGenFunctions import cut_floor
+from ModelGenFunctions import cloud_denoise
+from ModelGenFunctions import generate_mesh
+from data_extraction import dataExtract
+from data_extraction import drawMeasurements
+
+#Variable/Parameter Assignment Block
+silence = False # silences console output from supported functions.
+noise_passes = 5 # denoise passes: decrease to 4 if there are holes, increasing past 7 likely to completely decimate model
+waist_thresh = 8 # ???
+reconst_depth = 7 # reconstruction depth: amount of subdivisions. definitely exponential complexity, advise going no higher than 10 or 11
+mesh_cut = False # experimental floor cutting for the mesh to remove "drape", no time for detailed refinement
+paint = True # paint mesh a solid color instead of keeping color information from the point cloud.
 
 # Temporary for testing. Replace with point cloud sent from web
 pc = o3d.io.read_point_cloud("point-cloud-example/brandon-5_8_slow.ply")
 
-pc = cut_floor(pc)
+if(pc.has_points() == False):
+    print("There was a problem with the point cloud: Cloud is Empty.")
+    exit(1)
+
+pc = cut_floor(pc, silence)
 
 # Had to modify function from original to work
-pc = cloud_denoise(pc)
+pc = cloud_denoise(pc, noise_passes, silence)
 
 height, wingspan, height_points, wingspan_points, waistCloud, everythingelse = dataExtract(pc)
 
@@ -22,7 +37,7 @@ print(
     f"Actual Height: 68 in\n" +
     f"Wingspan after conversion: {wingspan * ratio} in"
 )
-mesh = generate_mesh(pc)
+mesh = generate_mesh(pc, reconst_depth, mesh_cut, paint, silence)
 
 # Draws pc with measurement to see if everything is correct.
 # Comment this out for final build
