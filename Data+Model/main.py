@@ -12,16 +12,19 @@ pc = cut_floor(pc)
 # Had to modify function from original to work
 pc = cloud_denoise(pc)
 
-height, wingspan, height_points, wingspan_points = dataExtract(pc)
+height, wingspan, height_points, wingspan_points, waistCloud, everythingelse = dataExtract(pc)
 
 # Replace with function that sends this data to web app
+ratio = 68/height
 print(
     f"Height: {height} units\n" +
-    f"Wingspan: {wingspan} units"
+    f"Wingspan: {wingspan} units\n" +
+    f"Actual Height: 68 in\n" +
+    f"Wingspan after conversion: {wingspan * ratio} in"
 )
 mesh = generate_mesh(pc)
 
 # Draws pc with measurement to see if everything is correct.
 # Comment this out for final build
-drawMeasurements(pc, height_points, wingspan_points)
+drawMeasurements(pc, height, height_points, wingspan_points, waistCloud, everythingelse)
 #o3d.visualization.draw_geometries([mesh])
