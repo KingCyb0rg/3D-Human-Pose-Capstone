@@ -1,8 +1,16 @@
+@JS()
+library ScannerApp;
+
 import 'dart:collection';
+import 'package:flutter/widgets.dart';
+import 'package:js/js.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'dart:js' as js;
+import 'package:video_player/video_player.dart';
+
+@JS('ScannerApp.start_prediction')
+external void start_prediction();
 
 void main() {
   runApp(MyApp());
@@ -66,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textButtonTheme.style,
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return const ScanningPage(title: "Scanner Environment");
+                  return const InstructionPage(title: "Scan Instructions");
                 }));
               },
               child: Text('Start Scan')),
@@ -105,6 +113,73 @@ class ScanningPage extends StatefulWidget {
   _ScanningPageState createState() => _ScanningPageState();
 }
 
+class InstructionPage extends StatefulWidget {
+  const InstructionPage({Key? key, required this.title}) : super(key: key);
+  final String title;
+
+  @override
+  _InstructionPageState createState() => _InstructionPageState();
+}
+
+class _InstructionPageState extends State<InstructionPage> {
+  late VideoPlayerController _playerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _playerController = VideoPlayerController.asset("videos/instructions.mp4")
+      ..initialize().then((_) => {setState(() {})});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Row(
+          children: [
+            _playerController.value.isInitialized
+                ? AspectRatio(
+                    aspectRatio: _playerController.value.aspectRatio,
+                    child: VideoPlayer(_playerController),
+                  )
+                : Container(),
+            Spacer(),
+            Column(
+              children: [
+                FloatingActionButton(
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return const ScanningPage(title: "Scanning Page");
+                      }));
+                    },
+                    child: Icon(Icons.forward)),
+                SizedBox(height: 30),
+                FloatingActionButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Icon(Icons.arrow_back),
+                )
+              ],
+            ),
+            SizedBox(width: 10),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _playerController.value.isPlaying
+                ? _playerController.pause()
+                : _playerController.play();
+          });
+        },
+        child: Icon(
+            _playerController.value.isPlaying ? Icons.pause : Icons.play_arrow),
+      ),
+    );
+  }
+}
+
 class _ScanningPageState extends State<ScanningPage> {
   InAppWebView createWebView() {
     return InAppWebView(
@@ -119,7 +194,7 @@ class _ScanningPageState extends State<ScanningPage> {
       ),
       initialSettings: InAppWebViewSettings(
         javaScriptEnabled: true,
-        useOnLoadResource: true,
+        useOnLoadResource: false,
         verticalScrollBarEnabled: false,
         horizontalScrollBarEnabled: false,
         disableHorizontalScroll: true,
@@ -132,6 +207,8 @@ class _ScanningPageState extends State<ScanningPage> {
   Future<InAppWebView> callAsyncWebView() async =>
       await Future.delayed(Duration(seconds: 3), () => createWebView());
 
+  late VideoPlayerController videoPlayerController;
+
   @override
   void initState() {
     super.initState();
@@ -141,7 +218,7 @@ class _ScanningPageState extends State<ScanningPage> {
           builder: (BuildContext context) => new AlertDialog(
                 title: new Text("Scanning Setup"),
                 content: new Text(
-                    "Please confirm that you are outdoors before starting the scan."),
+                    "Please make sure that you are outside before starting the scanning process."),
                 backgroundColor: Colors.white,
                 actions: <Widget>[
                   new TextButton(
@@ -219,9 +296,7 @@ class _ScanningPageState extends State<ScanningPage> {
                 child: ElevatedButton(
                   child: const Text('Start'),
                   onPressed: () {
-                    setState(() {
-                      js.context.callMethod('start');
-                    });
+                    start_prediction();
                   },
                   style: Theme.of(context).textButtonTheme.style,
                 ),

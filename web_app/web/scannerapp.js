@@ -11,30 +11,13 @@ let webcamRunning = true;
 const videoHeight = "360px";
 const videoWidth = "480px";
 document.body.style.backgroundColor = "red";
-
-const createPoseLandmarker = async () => {
-  const vision = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-  );
-  poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: "app/shared/models/pose_landmarker_lite.task",
-    },
-    runningMode: runningMode,
-  });
-};
-
-createPoseLandmarker();
-
 const video = document.getElementById("webcam");
-const canvasElement = document.getElementById(
-  "output_canvas"
-);
+const canvasElement = document.getElementById("output_canvas");
 const canvasCtx = canvasElement.getContext("2d");
 const drawingUtils = new DrawingUtils(canvasCtx);
-const constraints = {
-  video: true
-};
+const constraints = {video: true};
+
+
 
 function angleMeasure(shx, shy, wrx, wry, hpx, hpy) {
   var wrist = Math.atan2(wry - shy, wrx - shx);
@@ -53,12 +36,17 @@ function isGood(leftAngle, rightAngle) {
   }
 }
 
-
-navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-  video.srcObject = stream;
-  video.addEventListener("loadeddata", predictWebcam);
-});
-
+const createPoseLandmarker = async () => {
+  const vision = await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+  );
+  poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath: "app/shared/models/pose_landmarker_lite.task",
+    },
+    runningMode: runningMode,
+  });
+};
 
 async function predictWebcam() {
   let lastVideoTime = -1;
@@ -118,3 +106,13 @@ async function predictWebcam() {
     window.requestAnimationFrame(predictWebcam);
   }
 }
+
+function start_prediction() {
+  createPoseLandmarker();
+  navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    video.srcObject = stream;
+    video.addEventListener("loadeddata", predictWebcam);
+  });
+}
+
+start_prediction();
