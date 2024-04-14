@@ -4,7 +4,6 @@ import {
   DrawingUtils
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js";
 
-
 let poseLandmarker = undefined;
 let runningMode = "VIDEO";
 let webcamRunning = true;

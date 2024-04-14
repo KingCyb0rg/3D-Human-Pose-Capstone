@@ -1,16 +1,8 @@
-@JS()
-library ScannerApp;
-
 import 'dart:collection';
-import 'package:flutter/widgets.dart';
-import 'package:js/js.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:video_player/video_player.dart';
-
-@JS('ScannerApp.start_prediction')
-external void start_prediction();
 
 void main() {
   runApp(MyApp());
@@ -104,15 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class ScanningPage extends StatefulWidget {
-  const ScanningPage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _ScanningPageState createState() => _ScanningPageState();
-}
-
 class InstructionPage extends StatefulWidget {
   const InstructionPage({Key? key, required this.title}) : super(key: key);
   final String title;
@@ -180,9 +163,23 @@ class _InstructionPageState extends State<InstructionPage> {
   }
 }
 
+class ScanningPage extends StatefulWidget {
+  const ScanningPage({Key? key, required this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  _ScanningPageState createState() => _ScanningPageState();
+}
+
 class _ScanningPageState extends State<ScanningPage> {
+  late InAppWebViewController _appWebViewController;
+
   InAppWebView createWebView() {
     return InAppWebView(
+      onWebViewCreated: (controller) {
+        _appWebViewController = controller;
+      },
       initialFile: "web/ScannerApp.html",
       initialUserScripts: UnmodifiableListView<UserScript>(
         [
@@ -206,8 +203,6 @@ class _ScanningPageState extends State<ScanningPage> {
 
   Future<InAppWebView> callAsyncWebView() async =>
       await Future.delayed(Duration(seconds: 3), () => createWebView());
-
-  late VideoPlayerController videoPlayerController;
 
   @override
   void initState() {
@@ -252,12 +247,12 @@ class _ScanningPageState extends State<ScanningPage> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      color: Colors.black,
+                      color: Colors.white,
                     ),
                     IconButton(
                       onPressed: () {},
                       icon: new Icon(Icons.help_outline),
-                      color: Colors.black,
+                      color: Colors.white,
                     ),
                   ],
                 ),
@@ -270,9 +265,9 @@ class _ScanningPageState extends State<ScanningPage> {
                     child: FutureBuilder<InAppWebView>(
                       future: callAsyncWebView(),
                       builder: (context, AsyncSnapshot<InAppWebView> snapshot) {
-                        if (snapshot.hasData)
+                        if (snapshot.hasData) {
                           return snapshot.requireData;
-                        else
+                        } else
                           return Center(
                             child: SizedBox(
                                 width: 50,
@@ -293,12 +288,25 @@ class _ScanningPageState extends State<ScanningPage> {
                 padding: EdgeInsets.all(10),
                 clipBehavior: Clip.hardEdge,
                 decoration: defaultBoxDecoration(),
-                child: ElevatedButton(
-                  child: const Text('Start'),
-                  onPressed: () {
-                    start_prediction();
-                  },
-                  style: Theme.of(context).textButtonTheme.style,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      child: const Text('Start Recording'),
+                      onPressed: () {
+                        _appWebViewController.injectJavascriptFileFromAsset(
+                            assetFilePath: "javascript/StartScanCapture.js");
+                      },
+                      style: Theme.of(context).textButtonTheme.style,
+                    ),
+                    ElevatedButton(
+                        onPressed: () {
+                          _appWebViewController.injectJavascriptFileFromAsset(
+                              assetFilePath: "javascript/StopScanCapture.js");
+                        },
+                        child: const Text("Stop Recording"))
+                  ],
                 ),
               ),
             ]),
@@ -333,7 +341,7 @@ class _ViewModelPageState extends State<ViewModelPage> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  color: Colors.black),
+                  color: Colors.white),
             ),
             // Model viewer environment placeholder
             Expanded(
