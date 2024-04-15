@@ -7,6 +7,7 @@ import {
 let poseLandmarker = undefined;
 let runningMode = "VIDEO";
 let webcamRunning = true;
+let recordingOutput = undefined;
 const videoHeight = "360px";
 const videoWidth = "480px";
 document.body.style.backgroundColor = "red";
@@ -15,6 +16,7 @@ const canvasElement = document.getElementById("output_canvas");
 const canvasCtx = canvasElement.getContext("2d");
 const drawingUtils = new DrawingUtils(canvasCtx);
 const constraints = {video: true};
+const recordingTimeMS = 30000;
 
 
 
@@ -114,4 +116,33 @@ function start_prediction() {
   });
 }
 
-start_prediction();
+
+
+function wait(delay) {
+  return new Promis((resolve) => setTimeout(resolve, delay));
+}
+
+function startRecording(stream, length) {
+  let recorder = new MediaRecorder(stream);
+  let data = [];
+
+  recorder.ondatavailable = (event) => data.push(event.data);
+  recorder.start();
+
+  let stopped = new Promise((resolve, reject) => {
+    recorder.onstop = resolve;
+    recorder.onerror = (event) => reject(event.name);
+  });
+
+  let recorded = wait(length).then(() => {
+    if (recorder.state == "recording") {
+      recorder.stop();
+    }
+  });
+
+  return Promise.all([stopped, recorded]).then(() => data);
+}
+
+function stop(stream) {
+  stream.getTrack().forEach((track) => track.stop());
+}

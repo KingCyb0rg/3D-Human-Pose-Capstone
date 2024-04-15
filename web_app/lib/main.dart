@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -66,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textButtonTheme.style,
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return const InstructionPage(title: "Scan Instructions");
+                  return const VideoPage(title: "Scan Instructions");
                 }));
               },
               child: Text('Start Scan')),
@@ -96,15 +97,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class InstructionPage extends StatefulWidget {
-  const InstructionPage({Key? key, required this.title}) : super(key: key);
+class VideoPage extends StatefulWidget {
+  const VideoPage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
-  _InstructionPageState createState() => _InstructionPageState();
+  _VideoPageState createState() => _VideoPageState();
 }
 
-class _InstructionPageState extends State<InstructionPage> {
+class _VideoPageState extends State<VideoPage> {
   late VideoPlayerController _playerController;
 
   @override
@@ -118,46 +119,98 @@ class _InstructionPageState extends State<InstructionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _playerController.value.isInitialized
-                ? AspectRatio(
-                    aspectRatio: _playerController.value.aspectRatio,
-                    child: VideoPlayer(_playerController),
-                  )
-                : Container(),
-            Spacer(),
-            Column(
-              children: [
-                FloatingActionButton(
+            Container(
+              alignment: Alignment.topLeft,
+              padding: EdgeInsets.all(10),
+              clipBehavior: Clip.hardEdge,
+              decoration: defaultBoxDecoration(),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BackButton(
                     onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return const ScanningPage(title: "Scanning Page");
-                      }));
+                      Navigator.pop(context);
                     },
-                    child: Icon(Icons.forward)),
-                SizedBox(height: 30),
-                FloatingActionButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Icon(Icons.arrow_back),
-                )
-              ],
+                    color: Colors.white,
+                  )
+                ],
+              ),
             ),
-            SizedBox(width: 10),
+            Expanded(
+              child: _playerController.value.isInitialized
+                  ? AspectRatio(
+                      aspectRatio: _playerController.value.aspectRatio,
+                      child: VideoPlayer(_playerController),
+                    )
+                  : Container(),
+            ),
+            Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Rewind Button
+                  FloatingActionButton(
+                      onPressed: () {
+                        setState(() {
+                          _playerController.seekTo(
+                              _playerController.value.position -
+                                  const Duration(seconds: 10));
+                        });
+                      },
+                      child: Transform(
+                        transform: Matrix4.rotationY(pi),
+                        child: Icon(Icons.forward_10),
+                      )),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  // Play Pause Button
+                  FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        _playerController.value.isPlaying
+                            ? _playerController.pause()
+                            : _playerController.play();
+                      });
+                    },
+                    child: Icon(_playerController.value.isPlaying
+                        ? Icons.pause
+                        : Icons.play_arrow),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  // Fast Forward Button
+                  FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        _playerController.seekTo(
+                            _playerController.value.position +
+                                const Duration(seconds: 10));
+                      });
+                    },
+                    child: Icon(Icons.forward_10),
+                  ),
+                  SizedBox(width: 40),
+                  // Next Page Button
+                  FloatingActionButton(
+                      onPressed: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return const ScanningPage(title: "Scanning Page");
+                        }));
+                      },
+                      child: Icon(Icons.forward)),
+                ],
+              ),
+            ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _playerController.value.isPlaying
-                ? _playerController.pause()
-                : _playerController.play();
-          });
-        },
-        child: Icon(
-            _playerController.value.isPlaying ? Icons.pause : Icons.play_arrow),
       ),
     );
   }
@@ -212,8 +265,12 @@ class _ScanningPageState extends State<ScanningPage> {
           context: context,
           builder: (BuildContext context) => new AlertDialog(
                 title: new Text("Scanning Setup"),
-                content: new Text(
-                    "Please make sure that you are outside before starting the scanning process."),
+                content: new Text("""
+Please make sure that you are outside before starting the scanning process.
+The background will turn green when you assume the correct pose. 
+Click the 'Start Recording" Button once you are ready to start the scanning process.
+Recording can be stopped at any time using the "Stop Recording" Button.
+                    """),
                 backgroundColor: Colors.white,
                 actions: <Widget>[
                   new TextButton(
@@ -295,15 +352,15 @@ class _ScanningPageState extends State<ScanningPage> {
                     ElevatedButton(
                       child: const Text('Start Recording'),
                       onPressed: () {
-                        _appWebViewController.injectJavascriptFileFromAsset(
-                            assetFilePath: "javascript/StartScanCapture.js");
+                        _appWebViewController.evaluateJavascript(
+                            source: startRecording);
                       },
                       style: Theme.of(context).textButtonTheme.style,
                     ),
                     ElevatedButton(
                         onPressed: () {
-                          _appWebViewController.injectJavascriptFileFromAsset(
-                              assetFilePath: "javascript/StopScanCapture.js");
+                          _appWebViewController.evaluateJavascript(
+                              source: stopRecording);
                         },
                         child: const Text("Stop Recording"))
                   ],
@@ -394,3 +451,34 @@ BoxDecoration defaultBoxDecoration() => BoxDecoration(
       color: Colors.black,
       style: BorderStyle.solid,
     ));
+
+String startRecording = """
+navigator.mediaDevices
+  .getUserMedia({
+    video: true;
+    audio: false;
+  })
+  .then((stream) => {
+    video.srcObject = stream;
+    video.captureStream =
+      video.captureStream || video.mozCaptureStream;
+    return new Promise((resolve) => (preview.onplaying = resolve));
+  })
+  .then(() => startRecording(video.captureStream(), recordingTimeMS))
+  .then((recordedChunks) => {
+    let recordedBlob = new Blob(recordedChunks, { type: "video/mp4" });
+    recordingOutput = URL.createObjectURL(recordedBlob);
+  })
+  .catch((error) => {
+    if (error.name == "NotFoundError") {
+      print("Camera not found. Can't record.");
+    }
+    else {
+      print(error);
+    }
+  });
+""";
+
+String stopRecording = """
+stop(video.srcObject);
+""";
