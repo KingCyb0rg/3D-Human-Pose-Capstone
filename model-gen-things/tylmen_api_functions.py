@@ -3,13 +3,10 @@ import requests
 import open3d as o3d
 import numpy as np
 
-
-#def convert_mov: #Break FFmpeg In Case Of Glass
-def api_master_pipe(mov):
-    #ffmpeg will be real in 120934130947109 days
+def api_master_pipe(mov, interval=10, hush=False):
     api_upload_mov(mov)
     api_generate_ply()
-    out = api_wait_and_download()
+    out = api_wait_and_download(interval)
     return out
 
 def api_upload_mov(mov):
@@ -27,7 +24,7 @@ def api_get_sane_status():
         return 2
     return 0
     
-def api_wait_and_download():
+def api_wait_and_download(interval=10):
     download_url = "http://3.145.59.0:8000/api/download_ply/"   # GET [to dowload .ply file ]
     isdone = False
     while(isdone == False):
@@ -36,6 +33,6 @@ def api_wait_and_download():
             isdone = True
         if(api_response == 1):
             return -1
-        time.sleep(10)
+        time.sleep(interval)
     down_resp = requests.get(download_url)
     return down_resp
