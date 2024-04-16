@@ -2,6 +2,7 @@ import pathlib
 import argparse
 import open3d as o3d
 import numpy as np
+import pandas as pd
 
 #Functions for cleaning and measurement
 from reconstruct_extract import reconstruct_extract
@@ -19,7 +20,7 @@ def main():
                         default=5)
     parser.add_argument('-d', '--depth',
                         help='Reconstruction depth. Defaults to 7. higher values will exponentially increase reconstruction computation time (with diminishing returns on increase in fidelity), lower values will reduce model fidelity',
-                        dest='noise_passes',
+                        dest='recon_depth',
                         choices=range(1,15),
                         default=7)
     parser.add_argument('-t', '--ping-interval',
@@ -46,15 +47,16 @@ def main():
     #add -o if it determined to be needed
     args = parser.parse_args()
 
-    #code to get the video into a workable format goes here
-
-    #found the thing that does file uploads
-
-    video_file = 0
-    point_cloud = api_master_pipe(video_file, hush=args.ishushed)
-    mesh, data_array = reconstruct_extract(point_cloud, noise_passes=args.noise_passes, mesh_cut=args.second_cut_pass, paint=args.paint, hush=args.ishushed)
-    #code to output the mesh and extracted data to a .obj
-
+    video_file = open(args.infile, 'rb')
+    api_output = api_master_pipe(video_file, hush=args.ishushed, int= args.ping_wait)
+    ply = open('./sandbox/current.ply', 'wb')
+    ply.write(api_output)
+    #code to output the point cloud file as a .ply, and then take it back in in the open3d format
+    filepath = './sandbox/current.ply'
+    point_cloud = o3d.io.read_point_cloud(filepath)
+    mesh, data_array = reconstruct_extract(point_cloud, noise_passes=args.noise_passes, mesh_cut=args.second_cut_pass, reconst_depth=args.recon_depth, paint=args.paint, hush=args.ishushed)
+    #code to output the mesh and extracted data to a .obj and .csv
+    o3d.io.write_triangle_mesh('./sandbox/current.obj', mesh)
 
 if __name__ == '__main__':
     main()

@@ -7,11 +7,12 @@ def api_master_pipe(mov, interval=10, hush=False):
     api_upload_mov(mov)
     api_generate_ply()
     out = api_wait_and_download(interval)
-    return out
+    return out.content
 
 def api_upload_mov(mov):
     upload_url = "http://3.145.59.0:8000/api/upload/"   # POST [ to upload .mov file ]
-    #TODO
+    files = {'files': mov}
+    up_response = requests.post(upload_url, files)
 
 def api_generate_ply():
     generate_url = "http://3.145.59.0:8000/api/generate_ply/"   # GET [to generate .ply file ]
