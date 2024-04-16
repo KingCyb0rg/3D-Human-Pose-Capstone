@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -154,23 +153,21 @@ class _VideoPageState extends State<VideoPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Rewind Button
-                  FloatingActionButton(
-                      onPressed: () {
-                        setState(() {
-                          _playerController.seekTo(
-                              _playerController.value.position -
-                                  const Duration(seconds: 10));
-                        });
-                      },
-                      child: Transform(
-                        transform: Matrix4.rotationY(pi),
-                        child: Icon(Icons.forward_10),
-                      )),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _playerController.seekTo(
+                            _playerController.value.position -
+                                const Duration(seconds: 10));
+                      });
+                    },
+                    icon: Icon(Icons.arrow_back),
+                  ),
                   SizedBox(
                     width: 10,
                   ),
                   // Play Pause Button
-                  FloatingActionButton(
+                  IconButton(
                     onPressed: () {
                       setState(() {
                         _playerController.value.isPlaying
@@ -178,7 +175,7 @@ class _VideoPageState extends State<VideoPage> {
                             : _playerController.play();
                       });
                     },
-                    child: Icon(_playerController.value.isPlaying
+                    icon: Icon(_playerController.value.isPlaying
                         ? Icons.pause
                         : Icons.play_arrow),
                   ),
@@ -186,7 +183,7 @@ class _VideoPageState extends State<VideoPage> {
                     width: 10,
                   ),
                   // Fast Forward Button
-                  FloatingActionButton(
+                  IconButton(
                     onPressed: () {
                       setState(() {
                         _playerController.seekTo(
@@ -194,9 +191,9 @@ class _VideoPageState extends State<VideoPage> {
                                 const Duration(seconds: 10));
                       });
                     },
-                    child: Icon(Icons.forward_10),
+                    icon: Icon(Icons.arrow_forward),
                   ),
-                  SizedBox(width: 40),
+                  SizedBox(width: 50),
                   // Next Page Button
                   FloatingActionButton(
                       onPressed: () {
@@ -227,6 +224,7 @@ class ScanningPage extends StatefulWidget {
 
 class _ScanningPageState extends State<ScanningPage> {
   late InAppWebViewController _appWebViewController;
+  late var videoURL;
 
   InAppWebView createWebView() {
     return InAppWebView(
@@ -277,7 +275,7 @@ Recording can be stopped at any time using the "Stop Recording" Button.
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: new Text("Yes")),
+                      child: new Text("Okay")),
                 ],
               ));
     });
@@ -351,16 +349,18 @@ Recording can be stopped at any time using the "Stop Recording" Button.
                   children: [
                     ElevatedButton(
                       child: const Text('Start Recording'),
-                      onPressed: () {
-                        _appWebViewController.evaluateJavascript(
-                            source: startRecording);
+                      onPressed: () async {
+                        videoURL = await _appWebViewController
+                            .injectJavascriptFileFromAsset(
+                                assetFilePath: "js/StartRecording.js");
+                        print(videoURL);
                       },
                       style: Theme.of(context).textButtonTheme.style,
                     ),
                     ElevatedButton(
                         onPressed: () {
-                          _appWebViewController.evaluateJavascript(
-                              source: stopRecording);
+                          _appWebViewController.injectJavascriptFileFromAsset(
+                              assetFilePath: "js/StopRecording.js");
                         },
                         child: const Text("Stop Recording"))
                   ],
@@ -451,34 +451,3 @@ BoxDecoration defaultBoxDecoration() => BoxDecoration(
       color: Colors.black,
       style: BorderStyle.solid,
     ));
-
-String startRecording = """
-navigator.mediaDevices
-  .getUserMedia({
-    video: true;
-    audio: false;
-  })
-  .then((stream) => {
-    video.srcObject = stream;
-    video.captureStream =
-      video.captureStream || video.mozCaptureStream;
-    return new Promise((resolve) => (preview.onplaying = resolve));
-  })
-  .then(() => startRecording(video.captureStream(), recordingTimeMS))
-  .then((recordedChunks) => {
-    let recordedBlob = new Blob(recordedChunks, { type: "video/mp4" });
-    recordingOutput = URL.createObjectURL(recordedBlob);
-  })
-  .catch((error) => {
-    if (error.name == "NotFoundError") {
-      print("Camera not found. Can't record.");
-    }
-    else {
-      print(error);
-    }
-  });
-""";
-
-String stopRecording = """
-stop(video.srcObject);
-""";

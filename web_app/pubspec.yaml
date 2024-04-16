@@ -52,8 +52,8 @@ flutter:
     - images/IMG_1.jpg
     - images/tylmen_splash.jpg
     - videos/instructions.mp4
-    - javascript/StartScanCapture.js
-    - javascript/StopScanCapture.js
+    - js/StartRecording.js
+    - js/StopRecording.js
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
