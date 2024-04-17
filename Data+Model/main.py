@@ -27,7 +27,7 @@ pc = cut_floor(pc, silence)
 # Had to modify function from original to work
 pc = cloud_denoise(pc, noise_passes, silence)
 
-height, wingspan, height_points, wingspan_points, waistCloud, everythingelse = dataExtract(pc, extract_thresh)
+height, wingspan, height_points, wingspan_points, waistCloud, waiseLines = dataExtract(pc, extract_thresh)
 
 # Replace with function that sends this data to web app
 ratio = 68/height
@@ -39,7 +39,8 @@ print(
 )
 mesh = generate_mesh(pc, reconst_depth, mesh_cut, paint, silence)
 
-# Draws pc with measurement to see if everything is correct.
+# Draws pc with for testing.
 # Comment this out for final build
-drawMeasurements(pc, height, height_points, wingspan_points, waistCloud, everythingelse)
+#drawMeasurements(pc, height, height_points, wingspan_points, waistCloud, everythingelse)
 #o3d.visualization.draw_geometries([mesh])
+o3d.visualization.draw_geometries([waistCloud]+waiseLines)

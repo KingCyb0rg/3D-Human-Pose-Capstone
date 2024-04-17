@@ -38,7 +38,6 @@ def dataExtract(pointcloud, threshold=0.001):
     
     def getWaist(pointcloud, height, threshold):
         vertices =  np.asarray(pointcloud.points)
-
         # Sorts by y axis coordinate
         sorted_vertices = vertices[vertices[:, 1].argsort()]
         topPoint = sorted_vertices[-1]
@@ -46,7 +45,6 @@ def dataExtract(pointcloud, threshold=0.001):
         # Using 0.45 to approximate where the waist is.
         waistPoint = topPoint.copy()
         waistPoint[1] = waistPoint[1] - (height * 0.45)
-
         y_max = waistPoint[1] + threshold
         y_min = waistPoint[1] - threshold
 
@@ -73,10 +71,16 @@ def dataExtract(pointcloud, threshold=0.001):
             np.average(waist_vertices[:,2])
             ])
 
-        # Sorts
+        # Sorts around center point. Ignore y-axis
         angles = np.arctan2(waist_vertices[:, 0] - waist_center_point[0], waist_vertices[:, 2] - waist_center_point[2])
         indices = np.argsort(angles)
         sorted_waist_vertices = waist_vertices[indices]
+
+        # Smooth out points. Ignore y-axis
+
+
+
+
 
         # Calculates perimeter of waist.
         sum = 0
@@ -85,10 +89,12 @@ def dataExtract(pointcloud, threshold=0.001):
             if i+1 < len(sorted_waist_vertices):
                 v2 = sorted_waist_vertices[i+1]
             
+            # Adds up each distance from point to point
             distance = math.sqrt( pow(v2[0] - v1[0], 2) + pow(v2[2] - v1[2], 2) )
             print(distance)
             sum += distance
 
+            # Connects points into closed shape
             line_set = o3d.geometry.LineSet(
                 points=o3d.utility.Vector3dVector([v2, v1]),
                 lines=o3d.utility.Vector2iVector([[0,1]]),
@@ -98,7 +104,7 @@ def dataExtract(pointcloud, threshold=0.001):
 
         print(sum)
 
-        return waist_cloud
+        return waist_cloud, lines
 
     def getChest(pointcloud, height, threshold):
         vertices =  np.asarray(pointcloud.points)
@@ -142,14 +148,14 @@ def dataExtract(pointcloud, threshold=0.001):
     
     topPoint, bottomPoint, height = getHeight(pointcloud)
     leftPoint, rightPoint, wingspan = getWingSpan(pointcloud)
-    waistCloud = getWaist(pointcloud, height, threshold)
+    waistCloud, waistLines = getWaist(pointcloud, height, threshold)
     chestCloud, everythingelse = getChest(pointcloud, height, threshold)
 
     threshold = height/threshold
 
     #waistPoint1, waistPoint2, waistWidth = getWaist(pointcloud, leftPoint, threshold)
 
-    return height, wingspan, [topPoint, bottomPoint], [leftPoint, rightPoint], chestCloud, everythingelse
+    return height, wingspan, [topPoint, bottomPoint], [leftPoint, rightPoint], waistCloud, waistLines
 
 
 def drawMeasurements(pointcloud, height, height_points, width_points, waistCloud, everythingelse):
