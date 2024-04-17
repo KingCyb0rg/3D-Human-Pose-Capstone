@@ -65,19 +65,20 @@ def dataExtract(pointcloud, threshold=0.001):
         everythingelse = pointcloud.select_by_index(waist_indices, invert=True)
         waist_cloud.paint_uniform_color([0, 1, 0])
 
-        # Calculates perimeter of waist.
+        # Finds center point of waist.
         waist_vertices = np.asarray(waist_cloud.points)
         waist_center_point = np.asarray([
             np.average(waist_vertices[:,0]),
             np.average(waist_vertices[:,1]),
             np.average(waist_vertices[:,2])
             ])
-        print(waist_center_point)
 
+        # Sorts
         angles = np.arctan2(waist_vertices[:, 0] - waist_center_point[0], waist_vertices[:, 2] - waist_center_point[2])
         indices = np.argsort(angles)
         sorted_waist_vertices = waist_vertices[indices]
 
+        # Calculates perimeter of waist.
         sum = 0
         lines = []
         for i, v1 in enumerate(sorted_waist_vertices):
@@ -94,48 +95,42 @@ def dataExtract(pointcloud, threshold=0.001):
             )
             line_set.paint_uniform_color((0, 1, 0))
             lines.append(line_set)
-            
-        """ waist_cloud_tree = o3d.geometry.KDTreeFlann(waist_cloud)
-        sum = 0
-        count = 0
-        lines = []
-        for v in waist_vertices:
-            i = 1
-            # Finds nearest neighbor of v and assigns it to nearest_v.
-            [k, idx, _] = waist_cloud_tree.search_knn_vector_3d(v, len(waist_vertices))
-            nearest_v = waist_vertices[idx[i]]
-            nearest_v_key = (nearest_v[0], nearest_v[1], nearest_v[2])
-            print(f"Point {v} to Point {nearest_v}")
-
-            while i < len(waist_vertices):
-                if pointIsCovered[nearest_v_key]:
-                    nearest_v = waist_vertices[idx[i]]
-                    nearest_v_key = (nearest_v[0], nearest_v[1], nearest_v[2])
-                    i += 1
-                else:
-                    break
-
-            # Sums up distance between points.
-            if not pointIsCovered[nearest_v_key]:
-                count += 1
-                pointIsCovered[nearest_v_key] = True
-
-                distance = math.sqrt( pow(nearest_v[0] - v[0], 2) + pow(nearest_v[2] - v[2], 2) )
-                print(distance)
-                sum += distance
-
-                line_set = o3d.geometry.LineSet(
-                    points=o3d.utility.Vector3dVector([nearest_v, v]),
-                    lines=o3d.utility.Vector2iVector([[0,1]]),
-                )
-                line_set.paint_uniform_color((0, 1, 0))
-                lines.append(line_set) """
 
         print(sum)
-        #print(count)
 
-        return waist_cloud, everythingelse
+        return waist_cloud
 
+    def getChest(pointcloud, height, threshold):
+        vertices =  np.asarray(pointcloud.points)
+        div = height/32
+
+        # Sorts by y axis coordinate
+        sorted_vertices = vertices[vertices[:, 1].argsort()]
+        topPoint = sorted_vertices[-1]
+
+        # Using 0.45 to approximate where the waist is.
+        chestPoint = topPoint.copy()
+        chestPoint[1] = chestPoint[1] - (height - 23 * div)
+
+        y_max = chestPoint[1] + threshold
+        y_min = chestPoint[1] - threshold
+
+         # Grabs the indices that represents the chest within threshold
+        chest_indices = []
+        pointIsCovered = {}
+        for index, v in enumerate(vertices):
+            if v[1] < y_max and v[1] > y_min:
+                v_key = (v[0], v[1], v[2])
+
+                chest_indices.append(index)
+                pointIsCovered[v_key] = False
+
+        # Used to visualize the points being grabbed and separate chest from point cloud
+        chest_cloud = pointcloud.select_by_index(chest_indices)
+        everythingelse = pointcloud.select_by_index(chest_indices, invert=True)
+        chest_cloud.paint_uniform_color([1, 0, 1])
+
+        return chest_cloud, everythingelse
         
     
     # Rotates point cloud to correct orientation for measurements
@@ -147,14 +142,14 @@ def dataExtract(pointcloud, threshold=0.001):
     
     topPoint, bottomPoint, height = getHeight(pointcloud)
     leftPoint, rightPoint, wingspan = getWingSpan(pointcloud)
-    waistCloud, everythingelse = getWaist(pointcloud, height, threshold)
-    print(waistCloud)
+    waistCloud = getWaist(pointcloud, height, threshold)
+    chestCloud, everythingelse = getChest(pointcloud, height, threshold)
 
     threshold = height/threshold
 
     #waistPoint1, waistPoint2, waistWidth = getWaist(pointcloud, leftPoint, threshold)
 
-    return height, wingspan, [topPoint, bottomPoint], [leftPoint, rightPoint], waistCloud, everythingelse
+    return height, wingspan, [topPoint, bottomPoint], [leftPoint, rightPoint], chestCloud, everythingelse
 
 
 def drawMeasurements(pointcloud, height, height_points, width_points, waistCloud, everythingelse):
@@ -201,5 +196,8 @@ def drawMeasurements(pointcloud, height, height_points, width_points, waistCloud
     sphereWaist.scale(0.02, center = sphereWaist.get_center())
     sphereWaist.paint_uniform_color((0, 1, 0))
 
+    ball = o3d.geometry.TriangleMesh.create_sphere().translate((0,0,0), relative = False)
+    ball.scale(0.02, center = ball.get_center())
+
     #o3d.visualization.draw_geometries([pointcloud, sphereTop, sphereBottom, line_set_height, sphereLeft, sphereRight, line_set_width])
-    o3d.visualization.draw_geometries([sphereTop, sphereBottom, sphereRight, sphereLeft, line_set_height, line_set_width, waistCloud, everythingelse, pointcloud])
+    o3d.visualization.draw_geometries([sphereTop, sphereBottom, sphereRight, sphereLeft, line_set_height, line_set_width, waistCloud, everythingelse, pointcloud, ball])

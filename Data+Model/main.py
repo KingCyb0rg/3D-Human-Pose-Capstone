@@ -10,7 +10,7 @@ from data_extraction import drawMeasurements
 #Variable/Parameter Assignment Block
 silence = False # silences console output from supported functions.
 noise_passes = 5 # denoise passes: decrease to 4 if there are holes, increasing past 7 likely to completely decimate model
-waist_thresh = 0.001 # ???
+extract_thresh = 0.001 # sets the threshold for grabbing points from waist or chest
 reconst_depth = 7 # reconstruction depth: amount of subdivisions. definitely exponential complexity, advise going no higher than 10 or 11
 mesh_cut = False # experimental floor cutting for the mesh to remove "drape", no time for detailed refinement
 paint = True # paint mesh a solid color instead of keeping color information from the point cloud.
@@ -27,7 +27,7 @@ pc = cut_floor(pc, silence)
 # Had to modify function from original to work
 pc = cloud_denoise(pc, noise_passes, silence)
 
-height, wingspan, height_points, wingspan_points, waistCloud, everythingelse = dataExtract(pc, waist_thresh)
+height, wingspan, height_points, wingspan_points, waistCloud, everythingelse = dataExtract(pc, extract_thresh)
 
 # Replace with function that sends this data to web app
 ratio = 68/height
