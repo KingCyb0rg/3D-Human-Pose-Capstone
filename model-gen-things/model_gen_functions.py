@@ -108,7 +108,7 @@ def generate_mesh(cloud: o3d.geometry.PointCloud, depth = 7, experimental_clean=
     cloud_low_bound = cloud.get_min_bound()[2]
     if(silent==False):
         start = time()
-        print("Generating Model...") #not that this takes time before depth 9, but still
+        print("Generating model with depth " + depth) #not that this takes time before depth 9, but still
 
     #Reconstruction: algorithm requires normals
     cloud.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.5, max_nn=30))
@@ -143,7 +143,7 @@ def cloud_slice(cloud: o3d.geometry.PointCloud, slices = 50, silent = False):
     #Obtain bounding box of full cloud
     box = cloud.get_axis_aligned_bounding_box()
     bounds = np.asarray(box.get_box_points())
-    bounds = bounds[bounds[:,2].argsort()] #Sort array by z-axis
+    bounds = bounds[bounds[:,2].argsort()] #Sort points by z-axis
 
     builtslices = []
     sliceheight = (box.get_extent()[2]) / slices #divide by configurable value
@@ -152,13 +152,13 @@ def cloud_slice(cloud: o3d.geometry.PointCloud, slices = 50, silent = False):
         start = time()
         print("Slicing into " + slices + " parts")
     for i in range(slices):
-        temppcd = o3d.geometry.PointCloud(cloud)
+        temppcd = o3d.geometry.PointCloud(cloud) #copy constructor for no reason
         sliceboundarray.append(sliceboundarray[i]+(sliceheight)) #fill slice array with dividers
         builtslices.append(np.array(bounds)) #create new slice from existing bounds array
         for j in range(4):
             builtslices[i][j][2] = sliceboundarray[i] #Change z-values to slice's z-values (bounds array was sorted earlier)
             builtslices[i][(j+4)][2] = sliceboundarray[(i+1)] #the array starts with one item in it so this does not result in an error
-            #crop with bounding box and push to array
+            #crop with bounding box and push to array (the open3d functions here require certain types, so there's a lot of ugly nesting but it's just type conversions)
             builtslices[i] = temppcd.crop(o3d.geometry.AxisAlignedBoundingBox.create_from_points(o3d.utility.Vector3dVector(builtslices[i]))) 
     if(silent == False):
         end = time()

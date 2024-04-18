@@ -47,16 +47,26 @@ def main():
     #add -o if it determined to be needed
     args = parser.parse_args()
 
+    #body: opens the provided .mov file and then 
+    path = './sandbox/current.ply'
     video_file = open(args.infile, 'rb')
     api_output = api_master_pipe(video_file, hush=args.ishushed, int= args.ping_wait)
-    ply = open('./sandbox/current.ply', 'wb')
+    ply = open(path, 'wb')
     ply.write(api_output)
+    ply.close()
+
     #code to output the point cloud file as a .ply, and then take it back in in the open3d format
-    filepath = './sandbox/current.ply'
-    point_cloud = o3d.io.read_point_cloud(filepath)
-    mesh, data_array = reconstruct_extract(point_cloud, noise_passes=args.noise_passes, mesh_cut=args.second_cut_pass, reconst_depth=args.recon_depth, paint=args.paint, hush=args.ishushed)
+    point_cloud = o3d.io.read_point_cloud(path)
+    mesh, measure_frame = reconstruct_extract(point_cloud, noise_passes=args.noise_passes, mesh_cut=args.second_cut_pass, reconst_depth=args.recon_depth, paint=args.paint, hush=args.ishushed)
+
     #code to output the mesh and extracted data to a .obj and .csv
+    if(args.ishushed == False):
+        print("Writing mesh to " + " [directory]")
     o3d.io.write_triangle_mesh('./sandbox/current.obj', mesh)
+    if(args.ishushed == False):
+        print("Writing measurements to " + " [directory]")
+    measure_frame.to_csv('./sandbox/current.csv')
+
 
 if __name__ == '__main__':
     main()

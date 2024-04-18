@@ -1,5 +1,6 @@
 import open3d as o3d
 import numpy as np
+import pandas as pd
 
 #Functions for cleaning and measurement
 from model_gen_functions import cut_floor
@@ -12,11 +13,11 @@ def reconstruct_extract(cloud: o3d.geometry.PointCloud, noise_passes=5, waist_th
     cut_pcd = cut_floor(cloud, hush)
     denoise_pcd = cloud_denoise(cut_pcd, noise_passes, hush)
 
-    pcd_h, pcd_wspan, pcd_top_bot, pcd_l_r, pcd_waist, pcd_other = dataExtract(denoise_pcd, waist_thresh)
+    measure_frame = dataExtract(denoise_pcd, waist_thresh)
     poisson_mesh = generate_mesh(denoise_pcd, reconst_depth, mesh_cut, paint, hush)
 
-    #print("Height: " + str(pcd_h) + "\nWingspan: " + str(pcd_wspan) + "\nBounds: " + str(pcd_top_bot) + "\nWidth Bounds:" + str(pcd_l_r))
-    #o3d.visualization.draw_geometries([poisson_mesh], mesh_show_wireframe=True)
+    return poisson_mesh, measure_frame
+
 
 
     
