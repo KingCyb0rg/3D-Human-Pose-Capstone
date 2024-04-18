@@ -1,7 +1,7 @@
 import open3d as o3d
 import numpy as np
 import math
-import matplotlib.pyplot as plt
+import pandas as pd
 # Input Pointcloud object  Output: Returns height and width float, topPoint and bottomPoint list, leftPoint and rightPoint list
 # Extracts height and width from a pointcloud
 def dataExtract(pointcloud, threshold=0.001):
@@ -182,15 +182,21 @@ def dataExtract(pointcloud, threshold=0.001):
     # May cause program to break if point cloud generation methods change
     rotation = pointcloud.get_rotation_matrix_from_xyz((-np.pi / 2, 0, -np.pi / 2))
     pointcloud.rotate(rotation)
-
-    
     
     topPoint, bottomPoint, height = getHeight(pointcloud)
     leftPoint, rightPoint, wingspan = getWingSpan(pointcloud)
     waistCir = getWaist(pointcloud, height, threshold)
     chestCir = getChest(pointcloud, height, threshold)
 
-    return height, wingspan, waistCir, chestCir, [topPoint, bottomPoint], [leftPoint, rightPoint]
+    d = {"height": [height],
+         "wingspan": [wingspan],
+         "waist-cir": [waistCir],
+         "chest-cir": [chestCir]
+        }
+    
+    df = pd.DataFrame(data=d)
+
+    return df, [topPoint, bottomPoint], [leftPoint, rightPoint]
 
 # Only used for testing. Not needed for measurements.
 def drawMeasurements(pointcloud, height, height_points, width_points, waistCloud, everythingelse):

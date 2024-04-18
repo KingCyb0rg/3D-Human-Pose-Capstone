@@ -27,7 +27,12 @@ pc = cut_floor(pc, silence)
 # Had to modify function from original to work
 pc = cloud_denoise(pc, noise_passes, silence)
 
-height, wingspan, waistCir, chestCir, height_points, wingspan_points = dataExtract(pc, extract_thresh)
+measurements, height_points, wingspan_points = dataExtract(pc, extract_thresh)
+measurements = measurements.loc[0]
+height = measurements["height"]
+wingspan = measurements["wingspan"]
+waistCir = measurements["waist-cir"]
+chestCir = measurements["chest-cir"]
 
 # Replace with function that sends this data to web app
 ratio = 68/height
