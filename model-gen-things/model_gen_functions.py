@@ -52,27 +52,32 @@ def cloud_denoise(cloud: o3d.geometry.PointCloud, passes = 5, silent=False):
     if(passes >= 1):
         if(silent==False):
             print("Initial Count " + str((np.asarray(cloud.points).size)/3) + " Points")
-        denoise_cloud, ind = cloud.remove_statistical_outlier(nb_neighbors=15, std_ratio=1.9) #strict, low filter
+            print("Removing Bad/Dupe points before cleaning")
+        prepared_cloud = cloud.remove_duplicated_points()
+        prepared_cloud = prepared_cloud.remove_non_finite_points()
+        if(silent==False):
+            print("New Count " + str((np.asarray(prepared_cloud.points).size)/3) + " Points, beginning passes")
+        denoise_cloud, ind = cloud.remove_statistical_outlier(nb_neighbors=15, std_ratio=1.2) #std_ratio is the standard deviation a point must be 
         if(silent==False):
             p1 = time()
             print("Pass 1: " + str((np.asarray(denoise_cloud.points).size)/3) + " Points in " + str(p1 - start) + " seconds")
     if(passes >= 2):
-        denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=20, std_ratio=1.7) #less strict medium filter
+        denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=25, std_ratio=1.7)
         if(silent==False):
             p2 = time()
             print("Pass 2: " + str((np.asarray(denoise_cloud.points).size)/3) + " Points in " + str(p2 - p1) + " seconds")
     if(passes >= 3):
-        denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=25, std_ratio=1.6) #moreso
+        denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=100, std_ratio=2.0)
         if(silent==False):
             p3 = time()
             print("Pass 3: " + str((np.asarray(denoise_cloud.points).size)/3) + " Points in " + str(p3 - p2) + " seconds")
     if(passes >= 4):
-        denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=100, std_ratio=1.2) #huge filter, very lenient
+        denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=30, std_ratio=1.5)
         if(silent==False):
             p4 = time()
             print("Pass 4: " + str((np.asarray(denoise_cloud.points).size)/3) + " Points in " + str(p4 - p3) + " seconds")
     if(passes >= 5):
-        denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=85, std_ratio=1.3) #pulling it back in a bit
+        denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=50, std_ratio=1.8)
         if(silent==False):
             p5 = time()
             print("Pass 5: " + str((np.asarray(denoise_cloud.points).size)/3) + " Points in " + str(p5 - p4) + " seconds")
@@ -81,11 +86,11 @@ def cloud_denoise(cloud: o3d.geometry.PointCloud, passes = 5, silent=False):
         if(silent==False):
             pprevious = p5
         for x in range(passes - 5):
-            denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=30, std_ratio=1.5) #repeatable medium filter
+            denoise_cloud, ind = denoise_cloud.remove_statistical_outlier(nb_neighbors=30, std_ratio=1.8) #repeatable medium filter
             #going past 7 passes is very likely to completely decimate the model, 5 was already pushing it in some test cases. adjust to needs
             if(silent==False):
                 ploop = time()
-                print("Pass " + (x+5) +": " + str((np.asarray(denoise_cloud.points).size)/3) + " Points in " + str(ploop - pprevious) + " seconds")
+                print("Pass " + str(x+5) +": " + str((np.asarray(denoise_cloud.points).size)/3) + " Points in " + str(ploop - pprevious) + " seconds")
                 pprevious = ploop
 
     if(passes > 0):
@@ -94,7 +99,8 @@ def cloud_denoise(cloud: o3d.geometry.PointCloud, passes = 5, silent=False):
             print("Denoise complete in " + str(end - start) + " seconds")
         return denoise_cloud
     else:
-        return 0
+        return cloud
+
 
 
 #
