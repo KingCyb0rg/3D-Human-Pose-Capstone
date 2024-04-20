@@ -28,6 +28,7 @@ pc = cut_floor(pc, silence)
 pc = cloud_denoise(pc, noise_passes, silence)
 
 measurements, height_points, wingspan_points = dataExtract(pc, extract_thresh)
+
 measurements = measurements.loc[0]
 height = measurements["height"]
 wingspan = measurements["wingspan"]
@@ -48,6 +49,7 @@ print(
 )
 mesh = generate_mesh(pc, reconst_depth, mesh_cut, paint, silence)
 
+drawMeasurements(pc, height_points, wingspan_points)
 # Draws pc with for testing.
 # Comment this out for final build
 #drawMeasurements(pc, height, height_points, wingspan_points, waistCloud, everythingelse)
