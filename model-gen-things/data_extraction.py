@@ -1,7 +1,7 @@
 import open3d as o3d
 import numpy as np
 import math
-import matplotlib.pyplot as plt
+import pandas as pd
 # Input Pointcloud object  Output: Returns height and width float, topPoint and bottomPoint list, leftPoint and rightPoint list
 # Extracts height and width from a pointcloud
 def dataExtract(pointcloud, threshold=0.001):
@@ -182,18 +182,24 @@ def dataExtract(pointcloud, threshold=0.001):
     # May cause program to break if point cloud generation methods change
     rotation = pointcloud.get_rotation_matrix_from_xyz((-np.pi / 2, 0, -np.pi / 2))
     pointcloud.rotate(rotation)
-
-    
     
     topPoint, bottomPoint, height = getHeight(pointcloud)
     leftPoint, rightPoint, wingspan = getWingSpan(pointcloud)
     waistCir = getWaist(pointcloud, height, threshold)
     chestCir = getChest(pointcloud, height, threshold)
 
-    return height, wingspan, waistCir, chestCir, [topPoint, bottomPoint], [leftPoint, rightPoint]
+    d = {"height": [height],
+         "wingspan": [wingspan],
+         "waist-cir": [waistCir],
+         "chest-cir": [chestCir]
+        }
+    
+    df = pd.DataFrame(data=d)
+
+    return df, [topPoint, bottomPoint], [leftPoint, rightPoint]
 
 # Only used for testing. Not needed for measurements.
-def drawMeasurements(pointcloud, height, height_points, width_points, waistCloud, everythingelse):
+def drawMeasurements(pointcloud, height_points, width_points):
 
     # Top sphere to show topmost point
     sphereTop = o3d.geometry.TriangleMesh.create_sphere().translate(height_points[0], relative = False)
@@ -230,12 +236,5 @@ def drawMeasurements(pointcloud, height, height_points, width_points, waistCloud
     )
     line_set_width.paint_uniform_color((1, 0, 0))
 
-    # Waist sphere to show waist point
-    waistPoint = height_points[0].copy()
-    waistPoint[1] = waistPoint[1] - (height * 0.45)
-    sphereWaist = o3d.geometry.TriangleMesh.create_sphere().translate(waistPoint, relative = False)
-    sphereWaist.scale(0.02, center = sphereWaist.get_center())
-    sphereWaist.paint_uniform_color((0, 1, 0))
-
     #o3d.visualization.draw_geometries([pointcloud, sphereTop, sphereBottom, line_set_height, sphereLeft, sphereRight, line_set_width])
-    o3d.visualization.draw_geometries([sphereTop, sphereBottom, sphereRight, sphereLeft, line_set_height, line_set_width, waistCloud, everythingelse, pointcloud])
+    o3d.visualization.draw_geometries([sphereTop, sphereBottom, sphereRight, sphereLeft, line_set_height, line_set_width, pointcloud])

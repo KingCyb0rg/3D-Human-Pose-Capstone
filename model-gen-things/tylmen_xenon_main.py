@@ -1,17 +1,19 @@
-import pathlib
 import argparse
 import open3d as o3d
 import numpy as np
 import pandas as pd
+import os
 
 #Functions for cleaning and measurement
 from reconstruct_extract import reconstruct_extract
-from tylmen_api_functions import api_master_pipe
+from reconstruct_extract import build_path
+from tylmen_api_functions import api_download_pipe
+
 
 def main():
     #argument handling
     parser = argparse.ArgumentParser(
-        'Tylmen AR Webapp Backend', description='Backend script for Web app- Uses API to generate Point Cloud, then measures it and creates a 3D Model'
+        'Xenon-prototype', description='Fetches generated Point Cloud, then measures it and creates a 3D Model.'
     )
     parser.add_argument('-p', '--passes',
                         help='Amount of noise reduction passes to perform. Defaults to 5. Increasing past 6 will likely result in large holes appearing in the model.',
@@ -40,32 +42,45 @@ def main():
                         help='Disables most console output.',
                         dest='ishushed',
                         action='store_true')
-    parser.add_argument('-i', '--infile',
-                        help='Input file. Must be .mov',
-                        required=True,
-                        dest='infile')
     #add -o if it determined to be needed
     args = parser.parse_args()
-
-    #body: opens the provided .mov file and then 
-    path = './sandbox/current.ply'
-    video_file = open(args.infile, 'rb')
-    api_output = api_master_pipe(video_file, hush=args.ishushed, int= args.ping_wait)
-    ply = open(path, 'wb')
+    if(args.ishushed == False):
+        print("Xenon-prototype")
+    
+    #output paths
+    path = build_path()
+    plypath = os.path.join(path, 'pointcloud.ply')
+    meshpath = os.path.join(path, 'mesh.obj')
+    dfpath = os.path.join(path, 'measurements.csv')
+    abspath = os.path.abspath(path)
+    
+    #The Web Application directly calls the api for video upload, so this script does not.
+    api_output = api_download_pipe(hush=args.ishushed, int= args.ping_wait)
+    
+    #code to output the point cloud file as a .ply, and then take it back in through open3d
+    if(args.ishushed == False):
+        print("Writing PointCloud to " + plypath)
+    ply = open(plypath, 'wb')
     ply.write(api_output)
     ply.close()
-
-    #code to output the point cloud file as a .ply, and then take it back in in the open3d format
     point_cloud = o3d.io.read_point_cloud(path)
+
     mesh, measure_frame = reconstruct_extract(point_cloud, noise_passes=args.noise_passes, mesh_cut=args.second_cut_pass, reconst_depth=args.recon_depth, paint=args.paint, hush=args.ishushed)
 
     #code to output the mesh and extracted data to a .obj and .csv
     if(args.ishushed == False):
-        print("Writing mesh to " + " [directory]")
-    o3d.io.write_triangle_mesh('./sandbox/current.obj', mesh)
+        print("Writing mesh to " + meshpath)
+    o3d.io.write_triangle_mesh(meshpath, mesh)
     if(args.ishushed == False):
-        print("Writing measurements to " + " [directory]")
-    measure_frame.to_csv('./sandbox/current.csv')
+        print("Writing measurements to " + dfpath)
+    measure_frame.to_csv(dfpath)
+    
+    print("Details:")
+    print(point_cloud)
+    print(mesh)
+    print(measure_frame.to_markdown())
+    print("Files can be found at:")
+    print(abspath)
 
 
 if __name__ == '__main__':
