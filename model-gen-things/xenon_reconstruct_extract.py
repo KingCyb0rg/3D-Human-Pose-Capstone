@@ -40,20 +40,15 @@ def build_path():
         os.makedirs(basedir)
     #name folders by timestamp
     stamp = datetime.datetime.now()
-    stamp.microsecond = 0 #setting microns to 0 to remove them from iso format output
-    stampstring = stamp.isoformat()
+    stampstring = stamp.isoformat().replace(':', '-').replace('.', '_').replace('T', '_') #replace colons in time with hyphens, other specials with underscores
+
 
     fullpath = os.path.join(basedir, stampstring)
     os.makedirs(fullpath)
     return fullpath
 
-#   Previous Contents of model_gen_functions.py below this point
-#   Previous Contents of model_gen_functions.py below this point
-#   Previous Contents of model_gen_functions.py below this point
-#   Previous Contents of model_gen_functions.py below this point
-
 #
-# Each function supports silent, a bool which disables console output.
+# Each function below this point supports silent, a bool which disables (most) console output.
 #
 
 #
@@ -144,6 +139,8 @@ def cloud_denoise(cloud: o3d.geometry.PointCloud, passes = 5, silent=False):
             #3: huge requirement, lenient filter
             #4: moderate requirement, more strict
             #5: large requirement, somewhat lenient
+            #remove_statistical_outlier works by comparing the relative distances between points and their neighbors. ones that are too far away (comparatively)
+            #are discarded.
 
             #There is another function that could be useful if this code is actually used, remove_radius_outlier
             #Whenever I tried to call it, it gave a typeerror despite the arguments being correct (I checked many, many times)
@@ -182,7 +179,7 @@ def generate_mesh(cloud: o3d.geometry.PointCloud, depth = 7, experimental_clean=
     cloud_low_bound = cloud.get_min_bound()[2]
     if(silent==False):
         start = time_stamp()
-        print("Generating model with depth " + depth) #not that this takes time before depth 9, but still
+        print("Generating model with depth " + str(depth)) #not that this takes time before depth 9, but still
 
     #Reconstruction: algorithm requires normals
     cloud.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.5, max_nn=30))
@@ -239,3 +236,4 @@ def cloud_slice(cloud: o3d.geometry.PointCloud, slices = 50, silent = False):
         end = time_stamp()
         print("Slice completed in " + str(end-start) + " seconds")
     return builtslices
+

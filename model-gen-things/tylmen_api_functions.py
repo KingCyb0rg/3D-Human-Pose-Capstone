@@ -11,7 +11,6 @@ from timeit import default_timer as time_stamp
 #Main pipe function: tells server to start generating
 def api_download_pipe(interval=15, hush=False):
     #api_upload_mov(mov) #web app handles this bit
-    api_generate_ply()
     out = api_wait_and_download(interval)
     return out.content
 
@@ -20,17 +19,15 @@ def api_upload_mov(mov, hush=False):
     upload_url = "http://3.145.59.0:8000/api/upload/"   # POST [ to upload .mov file ]
     files = {'files': mov}
     up_response = requests.post(upload_url, files)
-
-#tells the server to begin generating the cloud.
-def api_generate_ply(hush=False):
-    generate_url = "http://3.145.59.0:8000/api/generate_ply/"   # GET [to generate .ply file ]
-    print("Told server to begin PointCloud generation")
-    gen_resp = requests.get(generate_url) #stored for umimplemented error handling reasons
+    #print(up_response.text)
 
 #checks the server's status, using a simple textmatch for the completion state.
 def api_get_sane_status(url):
     status_resp = requests.get(url)
-    if(status_resp.text() == "Genrating ply is done. You may download ply"): #hardcoded
+    print(status_resp.text) #comment this out if you want to declutter the output
+    if(status_resp.text == ""):
+        return 2
+    if(status_resp.text == " "):
         return 2
     return 0
     

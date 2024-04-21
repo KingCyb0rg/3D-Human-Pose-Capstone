@@ -43,7 +43,8 @@ def main():
                         help='Disables most console output.',
                         dest='ishushed',
                         action='store_true')
-    #add -o if it determined to be needed
+    #add -i for showcase if it is necessary
+    #add -o later if needed
     args = parser.parse_args()
 
     print("Xenon-prototype")
