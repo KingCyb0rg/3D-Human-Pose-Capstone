@@ -3,10 +3,11 @@ import open3d as o3d
 import numpy as np
 import pandas as pd
 import os
+from timeit import default_timer as time_stamp
 
 #Functions for cleaning and measurement
-from reconstruct_extract import reconstruct_extract
-from reconstruct_extract import build_path
+from xenon_reconstruct_extract import reconstruct_extract
+from xenon_reconstruct_extract import build_path
 from tylmen_api_functions import api_download_pipe
 
 
@@ -44,8 +45,9 @@ def main():
                         action='store_true')
     #add -o if it determined to be needed
     args = parser.parse_args()
-    if(args.ishushed == False):
-        print("Xenon-prototype")
+
+    print("Xenon-prototype")
+    start = time_stamp()
     
     #output paths
     path = build_path()
@@ -53,7 +55,7 @@ def main():
     meshpath = os.path.join(path, 'mesh.obj')
     dfpath = os.path.join(path, 'measurements.csv')
     abspath = os.path.abspath(path)
-    
+
     #The Web Application directly calls the api for video upload, so this script does not.
     api_output = api_download_pipe(hush=args.ishushed, int= args.ping_wait)
     
@@ -75,7 +77,9 @@ def main():
         print("Writing measurements to " + dfpath)
     measure_frame.to_csv(dfpath)
     
+    end = time_stamp()
     print("Details:")
+    print("Elapsed: " + str(end-start) + " seconds")
     print(point_cloud)
     print(mesh)
     print(measure_frame.to_markdown())
