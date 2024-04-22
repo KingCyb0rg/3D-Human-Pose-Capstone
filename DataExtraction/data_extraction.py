@@ -2,8 +2,8 @@ import open3d as o3d
 import numpy as np
 import math
 import pandas as pd
-# Input Pointcloud object  Output: Returns height and width float, topPoint and bottomPoint list, leftPoint and rightPoint list
-# Extracts height and width from a pointcloud
+# Input Pointcloud object  Output: Returns dataFrame of height, width, waist and chest, and topPoint and bottomPoint list, and leftPoint and rightPoint list
+# Extracts height, width, waist and chest from a pointcloud
 def dataExtract(pointcloud, threshold=0.001):
 
     # Input: Pointcloud object  Output: top and bottom cooridnates float, and height float
@@ -199,7 +199,7 @@ def dataExtract(pointcloud, threshold=0.001):
     return df, [topPoint, bottomPoint], [leftPoint, rightPoint]
 
 # Only used for testing. Not needed for measurements.
-def drawMeasurements(pointcloud, height, height_points, width_points, waistCloud, everythingelse):
+def drawMeasurements(pointcloud, height_points, width_points):
 
     # Top sphere to show topmost point
     sphereTop = o3d.geometry.TriangleMesh.create_sphere().translate(height_points[0], relative = False)
@@ -236,12 +236,5 @@ def drawMeasurements(pointcloud, height, height_points, width_points, waistCloud
     )
     line_set_width.paint_uniform_color((1, 0, 0))
 
-    # Waist sphere to show waist point
-    waistPoint = height_points[0].copy()
-    waistPoint[1] = waistPoint[1] - (height * 0.45)
-    sphereWaist = o3d.geometry.TriangleMesh.create_sphere().translate(waistPoint, relative = False)
-    sphereWaist.scale(0.02, center = sphereWaist.get_center())
-    sphereWaist.paint_uniform_color((0, 1, 0))
-
     #o3d.visualization.draw_geometries([pointcloud, sphereTop, sphereBottom, line_set_height, sphereLeft, sphereRight, line_set_width])
-    o3d.visualization.draw_geometries([sphereTop, sphereBottom, sphereRight, sphereLeft, line_set_height, line_set_width, waistCloud, everythingelse, pointcloud])
+    o3d.visualization.draw_geometries([sphereTop, sphereBottom, sphereRight, sphereLeft, line_set_height, line_set_width, pointcloud])
