@@ -366,10 +366,11 @@ class ViewModelPage extends StatefulWidget {
 class _ViewModelPageState extends State<ViewModelPage> {
   late Object model;
 
-  @override
-  void initState() {
-    model = 
-  }
+  // @override
+  // void initState() {
+  //   model =
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -390,7 +391,8 @@ class _ViewModelPageState extends State<ViewModelPage> {
             ),
             // Model viewer environment placeholder
             Expanded(
-              child: Cube(),
+              child: Container(),
+              // child: Cube(),
             ),
             Container(
               alignment: Alignment.center,

@@ -15,12 +15,16 @@ const canvasCtx = canvasElement.getContext("2d");
 const drawingUtils = new DrawingUtils(canvasCtx);
 const constraints = { video: true };
 const recordingTimeMS = 30000;
+
+
 let poseLandmarker = undefined;
 let runningMode = "VIDEO";
 let webcamRunning = true;
 document.body.style.backgroundColor = "red";
 let recordingOutput = undefined;
-const flag = undefined;
+let flag = false;
+let req;
+var timeout;
 
 function angleMeasure(shx, shy, wrx, wry, hpx, hpy) {
   var wrist = Math.atan2(wry - shy, wrx - shx);
@@ -31,13 +35,14 @@ function angleMeasure(shx, shy, wrx, wry, hpx, hpy) {
 function isGood(leftAngle, rightAngle) {
   if (leftAngle < 1.5 || leftAngle > 2 || rightAngle < -1.8 || rightAngle > -1.5) {
     console.log("NO GOOD");
-    document.body.style.backgroundColor = "red";
-    return false;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {flag = true;}, 5000);;
+    document.body.style.backgroundColor = "red";;
   }
   else {
     console.log("GOOD!!!!!!!!!!");
     document.body.style.backgroundColor = "green";
-    return true;
+    
   }
 }
 
@@ -103,8 +108,13 @@ async function predictWebcam() {
   }
 
   // Call this function again to keep predicting when the browser is ready.
-  if (webcamRunning === true) {
-    window.requestAnimationFrame(predictWebcam);
+  if (webcamRunning === true && flag === false) {
+    req = window.requestAnimationFrame(predictWebcam);
+  }
+  else {
+    window.cancelAnimationFrame(req);
+    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx.restore();
   }
 }
 
@@ -151,7 +161,7 @@ function startRecordingOnClick() {
   navigator.mediaDevices
     .getUserMedia({
       video: true,
-      audio: true,
+      audio: false,
     })
     .then((stream) => {
       console.log("getting video stream");
