@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter_cube/flutter_cube.dart';
 
 void main() {
   runApp(MyApp());
@@ -223,14 +224,9 @@ class ScanningPage extends StatefulWidget {
 }
 
 class _ScanningPageState extends State<ScanningPage> {
-  late InAppWebViewController _appWebViewController;
-  late var videoURL;
-
   InAppWebView createWebView() {
     return InAppWebView(
-      onWebViewCreated: (controller) {
-        _appWebViewController = controller;
-      },
+      onWebViewCreated: (controller) {},
       initialFile: "web/ScannerApp.html",
       initialUserScripts: UnmodifiableListView<UserScript>(
         [
@@ -261,23 +257,26 @@ class _ScanningPageState extends State<ScanningPage> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await showDialog<String>(
           context: context,
-          builder: (BuildContext context) => new AlertDialog(
-                title: new Text("Scanning Setup"),
-                content: new Text("""
+          builder: (BuildContext context) {
+            var data = """
 Please make sure that you are outside before starting the scanning process.
 The background will turn green when you assume the correct pose. 
 Click the 'Start Recording" Button once you are ready to start the scanning process.
 Recording can be stopped at any time using the "Stop Recording" Button.
-                    """),
-                backgroundColor: Colors.white,
-                actions: <Widget>[
-                  new TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: new Text("Okay")),
-                ],
-              ));
+                    """;
+            return new AlertDialog(
+              title: new Text("Scanning Setup"),
+              content: new Text(data),
+              backgroundColor: Colors.white,
+              actions: <Widget>[
+                new TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: new Text("Okay")),
+              ],
+            );
+          });
     });
   }
 
@@ -346,24 +345,7 @@ Recording can be stopped at any time using the "Stop Recording" Button.
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      child: const Text('Start Recording'),
-                      onPressed: () async {
-                        videoURL = await _appWebViewController
-                            .injectJavascriptFileFromAsset(
-                                assetFilePath: "js/StartRecording.js");
-                        print(videoURL);
-                      },
-                      style: Theme.of(context).textButtonTheme.style,
-                    ),
-                    ElevatedButton(
-                        onPressed: () {
-                          _appWebViewController.injectJavascriptFileFromAsset(
-                              assetFilePath: "js/StopRecording.js");
-                        },
-                        child: const Text("Stop Recording"))
-                  ],
+                  children: [],
                 ),
               ),
             ]),
@@ -382,6 +364,12 @@ class ViewModelPage extends StatefulWidget {
 }
 
 class _ViewModelPageState extends State<ViewModelPage> {
+  late Object model;
+
+  @override
+  void initState() {
+    model = 
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -402,14 +390,7 @@ class _ViewModelPageState extends State<ViewModelPage> {
             ),
             // Model viewer environment placeholder
             Expanded(
-              child: Container(
-                alignment: Alignment.center,
-                child: new Icon(
-                  Icons.construction,
-                  size: 50,
-                  color: Colors.purple,
-                ),
-              ),
+              child: Cube(),
             ),
             Container(
               alignment: Alignment.center,

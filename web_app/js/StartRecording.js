@@ -1,4 +1,4 @@
-const recordingTimeMS = 300;
+const recordingTimeMS = 3000;
 let recordingOutput = undefined;
 const video = document.getElementById("webcam");
 
@@ -46,9 +46,9 @@ function startRecordingOnClick() {
         .then((recordedChunks) => {
             console.log("Capturing recording chunks");
             let recordedBlob = new Blob(recordedChunks, { type: "video/mov" });
-            recordingOutput = URL.createObjectURL(recordedBlob);
             recordedBlob.lastModifiedDate = new Date();
             recordedBlob.name = "output";
+            recordingOutput = URL.createObjectURL(recordedBlob);
             console.log("Created video output");
         })
         .catch((error) => {
@@ -60,8 +60,7 @@ function startRecordingOnClick() {
             }
         });
 
-        console.log(recordingOutput.toString);
-        return recordingOutput.toString;
+        return recordingOutput;
 }
 
 startRecordingOnClick();

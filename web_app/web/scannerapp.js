@@ -4,19 +4,23 @@ import {
   DrawingUtils
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js";
 
+
+const video = document.getElementById("webcam");
+const canvasElement = document.getElementById("output_canvas");
+const callibrationButton = document.getElementById("callibrationBtn");
+const recordingButton = document.getElementById("recordBtn");
+const uploadButton = document.getElementById("uploadBtn");
+const stopButton = document.getElementById("stopBtn");
+const canvasCtx = canvasElement.getContext("2d");
+const drawingUtils = new DrawingUtils(canvasCtx);
+const constraints = { video: true };
+const recordingTimeMS = 30000;
 let poseLandmarker = undefined;
 let runningMode = "VIDEO";
 let webcamRunning = true;
-const videoHeight = "360px";
-const videoWidth = "480px";
 document.body.style.backgroundColor = "red";
-const video = document.getElementById("webcam");
-const canvasElement = document.getElementById("output_canvas");
-const canvasCtx = canvasElement.getContext("2d");
-const drawingUtils = new DrawingUtils(canvasCtx);
-const constraints = {video: true};
-
-
+let recordingOutput = undefined;
+const flag = undefined;
 
 function angleMeasure(shx, shy, wrx, wry, hpx, hpy) {
   var wrist = Math.atan2(wry - shy, wrx - shx);
@@ -28,10 +32,12 @@ function isGood(leftAngle, rightAngle) {
   if (leftAngle < 1.5 || leftAngle > 2 || rightAngle < -1.8 || rightAngle > -1.5) {
     console.log("NO GOOD");
     document.body.style.backgroundColor = "red";
+    return false;
   }
   else {
     console.log("GOOD!!!!!!!!!!");
     document.body.style.backgroundColor = "green";
+    return true;
   }
 }
 
@@ -49,10 +55,6 @@ const createPoseLandmarker = async () => {
 
 async function predictWebcam() {
   let lastVideoTime = -1;
-  canvasElement.style.height = videoHeight;
-  video.style.height = videoHeight;
-  canvasElement.style.width = videoWidth;
-  video.style.width = videoWidth;
 
   // Now let's start detecting the stream.
   let startTimeMs = performance.now();
@@ -81,7 +83,7 @@ async function predictWebcam() {
       )
       console.log("Left: " + left);
       console.log("Right: " + right);
-      isGood(left, right);
+      flag = isGood(left, right);
     } catch (err) {
       canvasCtx.restore();
       console.log("OFF SCREEN!");
@@ -113,3 +115,82 @@ function start_prediction() {
     video.addEventListener("loadeddata", predictWebcam);
   });
 }
+
+function wait(delay) {
+  return new Promise((resolve) => setTimeout(resolve, delay));
+}
+
+function startRecording(stream, length) {
+
+  let recorder = new MediaRecorder(stream);
+  let data = [];
+
+  recorder.ondataavailable = (event) => data.push(event.data);
+  recorder.start();
+
+  let stopped = new Promise((resolve, reject) => {
+    recorder.onstop = resolve;
+    recorder.onerror = (event) => reject(event.name);
+  });
+
+  let recorded = wait(length).then(() => {
+    if (recorder.state === "recording") {
+      recorder.stop();
+    }
+  });
+
+  return Promise.all([stopped, recorded]).then(() => data);
+}
+
+function stop(stream) {
+  stream.getTracks().forEach((track) => track.stop());
+}
+
+function startRecordingOnClick() {
+  console.log("getting started");
+  navigator.mediaDevices
+    .getUserMedia({
+      video: true,
+      audio: true,
+    })
+    .then((stream) => {
+      console.log("getting video stream");
+      video.srcObject = stream;
+      uploadButton.href = stream;
+      video.captureStream =
+        video.captureStream || video.mozCaptureStream;
+      return new Promise((resolve) => (video.onplaying = resolve));
+    })
+    .then(() => startRecording(video.captureStream(), recordingTimeMS))
+    .then((recordedChunks) => {
+      console.log("Captured recording chunks");
+      let recordedBlob = new Blob(recordedChunks, { type: "video/mov" });
+      recordingOutput = URL.createObjectURL(recordedBlob);
+      uploadButton.href = recordingOutput;
+      uploadButton.download = "RecordedVideo.webm";
+      console.log("Created video output");
+    })
+    .catch((error) => {
+      if (error.name === "NotFoundError") {
+        console.log("Camera not found. Can't record.");
+      }
+      else {
+        console.log(error);
+      }
+    });
+
+  return recordingOutput;
+}
+
+function stopRecordingOnClick() {
+  stop(video.srcObject);
+  canvasCtx.clearRect(0, 0, canvasCtx.width, canvasCtx.width)
+}
+
+function upload() { }
+
+
+stopButton.addEventListener("click", stopRecordingOnClick, false);
+uploadButton.addEventListener("click", upload, false);
+callibrationButton.addEventListener("click", start_prediction, false);
+recordingButton.addEventListener("click", startRecordingOnClick, false);
