@@ -1,0 +1,61 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden
+}
+
+.content {
+  margin: auto;
+  text-align: center;
+}
+
+.image_wrapper {
+  position: relative;
+  display: inline-block;
+  height: fit-content;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+video {
+  width: 640px;
+  height: 480px;
+  position: absolute;
+  z-index: 1;
+}
+
+canvas {
+  width: 640px;
+  height: 480px;
+  position: relative;
+  z-index: 20;
+}
+
+.overlay {
+  position: absolute;
+  z-index: 3000;
+  left: 750px;
+  top: 100px;
+}
+
+#tposeman {
+  opacity: 0.5;
+  visibility: hidden;
+}
+
+#downloadBtn, button{
+  background-color: grey;
+  color: black;
+  padding: 15px 25px;
+  text-decoration: none;
+}
+
+#downloadBtn:hover, button:hover{
+  background-color: lightgray;
+}
+
+#scan-button-row, #upload-button-row {
+  padding: auto;
+  margin: 10px;
+}
