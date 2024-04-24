@@ -454,8 +454,6 @@ class _ViewModelPageState extends State<ViewModelPage> {
                           builder: (BuildContext context) => new AlertDialog(
                                 title:
                                     new Text("Model Data (in Computer Units)"),
-                                icon:
-                                    Icon(Icons.data_array, color: Colors.black),
                                 content: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   child: modelData == null
@@ -475,15 +473,16 @@ class _ViewModelPageState extends State<ViewModelPage> {
                                                 (dataRow) => DataRow(
                                                   cells: dataRow
                                                       .map(
-                                                        (item) => DataCell(
+                                                        (rowItem) => DataCell(
                                                           Text(
-                                                            item.toString(),
+                                                            rowItem.toString(),
                                                           ),
                                                         ),
                                                       )
                                                       .toList(),
                                                 ),
                                               )
+                                              .skip(1)
                                               .toList(),
                                         ),
                                 ),
