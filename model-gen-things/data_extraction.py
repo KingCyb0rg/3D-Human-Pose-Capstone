@@ -2,9 +2,9 @@ import open3d as o3d
 import numpy as np
 import math
 import pandas as pd
-# Input Pointcloud object  Output: Returns height and width float, topPoint and bottomPoint list, leftPoint and rightPoint list
-# Extracts height and width from a pointcloud
-def dataExtract(pointcloud, threshold=0.001):
+# Input Pointcloud object  Output: Returns dataFrame of height, width, waist and chest, and topPoint and bottomPoint list, and leftPoint and rightPoint list
+# Extracts height, width, waist and chest from a pointcloud
+def dataExtract(pointcloud: o3d.geometry.PointCloud, threshold=0.001):
 
     # Input: Pointcloud object  Output: top and bottom cooridnates float, and height float
     def getHeight(pointcloud):
@@ -199,7 +199,7 @@ def dataExtract(pointcloud, threshold=0.001):
     return df, [topPoint, bottomPoint], [leftPoint, rightPoint]
 
 # Only used for testing. Not needed for measurements.
-def drawMeasurements(pointcloud, height_points, width_points):
+def drawMeasurements(pointcloud: o3d.geometry.PointCloud, height_points, width_points):
 
     # Top sphere to show topmost point
     sphereTop = o3d.geometry.TriangleMesh.create_sphere().translate(height_points[0], relative = False)

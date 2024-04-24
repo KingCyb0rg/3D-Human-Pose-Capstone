@@ -33,6 +33,9 @@ def api_get_sane_status(url):
     
 #begins pinging the server every interval seconds to check if it's done making the cloud. when it returns the completion state message,
 #downloads the ply.
+
+
+##PENDING REWRITE
 def api_wait_and_download(interval=15, hush=False):
     status_url = "http://3.145.59.0:8000/api/check_status/"   # GET [to check if generation process has finished ]
     download_url = "http://3.145.59.0:8000/api/download_ply/"   # GET [to dowload .ply file ]

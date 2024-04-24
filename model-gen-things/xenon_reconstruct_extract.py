@@ -25,7 +25,7 @@ def reconstruct_extract(cloud: o3d.geometry.PointCloud, noise_passes=5, reconst_
     end = time_stamp()
     if(hush==False):
         print("Processing completed in " + str(end-start) + " seconds")
-    return poisson_mesh, measure_frame
+    return denoise_pcd, poisson_mesh, measure_frame
 
 #
 #   This function creates and returns the path to place output files into:

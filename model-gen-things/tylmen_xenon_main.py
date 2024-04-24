@@ -47,11 +47,12 @@ def main():
     #add -o later if needed
     args = parser.parse_args()
 
-    print("Xenon-prototype")
+    print("Xenon-proto v0.0.11")
     start = time_stamp()
     
     #output paths
     path = build_path()
+    cleanplypath = os.path.join(path, 'pointcloud_cleaned.ply')
     plypath = os.path.join(path, 'pointcloud.ply')
     meshpath = os.path.join(path, 'mesh.obj')
     dfpath = os.path.join(path, 'measurements.csv')
@@ -66,11 +67,14 @@ def main():
     ply = open(plypath, 'wb')
     ply.write(api_output)
     ply.close()
-    point_cloud = o3d.io.read_point_cloud(path)
+    point_cloud = o3d.io.read_point_cloud(plypath)
 
-    mesh, measure_frame = reconstruct_extract(point_cloud, noise_passes=args.noise_passes, mesh_cut=args.second_cut_pass, reconst_depth=args.recon_depth, paint=args.paint, hush=args.ishushed)
+    denoise_cloud, mesh, measure_frame = reconstruct_extract(point_cloud, noise_passes=args.noise_passes, mesh_cut=args.second_cut_pass, reconst_depth=args.recon_depth, paint=args.paint, hush=args.ishushed)
 
     #code to output the mesh and extracted data to a .obj and .csv
+    if(args.ishushed == False):
+        print("Writing cleaned point cloud to " + cleanplypath)
+    o3d.io.write_point_cloud(cleanplypath, denoise_cloud)
     if(args.ishushed == False):
         print("Writing mesh to " + meshpath)
     o3d.io.write_triangle_mesh(meshpath, mesh)
@@ -81,7 +85,7 @@ def main():
     end = time_stamp()
     print("Details:")
     print("Elapsed: " + str(end-start) + " seconds")
-    print(point_cloud)
+    print(denoise_cloud)
     print(mesh)
     print(measure_frame.to_markdown())
     print("Files can be found at:")
