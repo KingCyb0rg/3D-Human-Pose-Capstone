@@ -10,17 +10,21 @@ const canvasElement = document.getElementById("output_canvas");
 const callibrationButton = document.getElementById("callibrationBtn");
 const recordingButton = document.getElementById("recordBtn");
 const uploadButton = document.getElementById("uploadBtn");
+const downloadButton = document.getElementById("downloadBtn");
 const stopButton = document.getElementById("stopBtn");
+const statusElement = document.getElementById("status")
 const canvasCtx = canvasElement.getContext("2d");
 const drawingUtils = new DrawingUtils(canvasCtx);
 const constraints = { video: true };
-const recordingTimeMS = 30000;
+const recordingTimeMS = 5000;
 let poseLandmarker = undefined;
 let runningMode = "VIDEO";
 let webcamRunning = true;
 document.body.style.backgroundColor = "red";
+let req;
 let recordingOutput = undefined;
-const flag = undefined;
+let flag = false;
+var timeout;
 
 function angleMeasure(shx, shy, wrx, wry, hpx, hpy) {
   var wrist = Math.atan2(wry - shy, wrx - shx);
@@ -30,14 +34,12 @@ function angleMeasure(shx, shy, wrx, wry, hpx, hpy) {
 
 function isGood(leftAngle, rightAngle) {
   if (leftAngle < 1.5 || leftAngle > 2 || rightAngle < -1.8 || rightAngle > -1.5) {
-    console.log("NO GOOD");
     document.body.style.backgroundColor = "red";
-    return false;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {flag = true;}, 5000);
   }
   else {
-    console.log("GOOD!!!!!!!!!!");
     document.body.style.backgroundColor = "green";
-    return true;
   }
 }
 
@@ -56,6 +58,7 @@ const createPoseLandmarker = async () => {
 async function predictWebcam() {
   let lastVideoTime = -1;
 
+  document.getElementById("tposeman").style.visibility = "visible";
   // Now let's start detecting the stream.
   let startTimeMs = performance.now();
 
@@ -81,12 +84,9 @@ async function predictWebcam() {
         poseLandMarkerResult.landmarks[0][23].x,
         poseLandMarkerResult.landmarks[0][23].y
       )
-      console.log("Left: " + left);
-      console.log("Right: " + right);
-      flag = isGood(left, right);
+      isGood(left, right);
     } catch (err) {
       canvasCtx.restore();
-      console.log("OFF SCREEN!");
     }
 
     for (const landmarks of poseLandMarkerResult.landmarks) {
@@ -103,8 +103,15 @@ async function predictWebcam() {
   }
 
   // Call this function again to keep predicting when the browser is ready.
-  if (webcamRunning === true) {
-    window.requestAnimationFrame(predictWebcam);
+  if (webcamRunning === true && flag === false) {
+    req=window.requestAnimationFrame(predictWebcam);
+  }
+  else {
+    document.getElementById("tposeman").style.visibility = "hidden";
+    window.cancelAnimationFrame(req);
+    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx.restore();
+    return;
   }
 }
 
@@ -120,6 +127,10 @@ function wait(delay) {
   return new Promise((resolve) => setTimeout(resolve, delay));
 }
 
+function status(msg) {
+  statusElement.innerHTML += `${msg}\n`;
+}
+
 function startRecording(stream, length) {
 
   let recorder = new MediaRecorder(stream);
@@ -127,6 +138,7 @@ function startRecording(stream, length) {
 
   recorder.ondataavailable = (event) => data.push(event.data);
   recorder.start();
+  status(`${recorder.state} for ${length / 1000} seconds...`);
 
   let stopped = new Promise((resolve, reject) => {
     recorder.onstop = resolve;
@@ -143,52 +155,65 @@ function startRecording(stream, length) {
 }
 
 function stop(stream) {
+  if(req) {
+    document.getElementById("tposeman").style.visibility = "hidden";
+    window.cancelAnimationFrame(req);
+    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  }
+  video.removeEventListener("loadeddata", predictWebcam);
   stream.getTracks().forEach((track) => track.stop());
 }
 
 function startRecordingOnClick() {
-  console.log("getting started");
+  video.removeEventListener("loadeddata", predictWebcam);
   navigator.mediaDevices
     .getUserMedia({
       video: true,
-      audio: true,
     })
     .then((stream) => {
-      console.log("getting video stream");
       video.srcObject = stream;
-      uploadButton.href = stream;
+      downloadButton.href = stream;
       video.captureStream =
         video.captureStream || video.mozCaptureStream;
       return new Promise((resolve) => (video.onplaying = resolve));
     })
     .then(() => startRecording(video.captureStream(), recordingTimeMS))
     .then((recordedChunks) => {
-      console.log("Captured recording chunks");
       let recordedBlob = new Blob(recordedChunks, { type: "video/mov" });
-      recordingOutput = URL.createObjectURL(recordedBlob);
-      uploadButton.href = recordingOutput;
-      uploadButton.download = "RecordedVideo.webm";
-      console.log("Created video output");
+      let videoURL = URL.createObjectURL(recordedBlob);
+      downloadButton.href = videoURL;
+      downloadButton.download = "demo_scan.mov";
+      recordingOutput = new File([recordedBlob], 'demo_scan.mov', {type: recordedBlob.type});
+
+      status(`Successfully recorded scan video.`)
     })
     .catch((error) => {
       if (error.name === "NotFoundError") {
-        console.log("Camera not found. Can't record.");
+        status("Camera not found. Can't record.");
       }
       else {
-        console.log(error);
+        status(error);
       }
     });
-
-  return recordingOutput;
 }
 
 function stopRecordingOnClick() {
   stop(video.srcObject);
-  canvasCtx.clearRect(0, 0, canvasCtx.width, canvasCtx.width)
 }
 
-function upload() { }
-
+function upload() {
+  const apiURL = 'http://3.145.59.0:8000/api/upload/'
+  fetch(apiURL, {Method: 'POST', body: file}).then(response => {
+    if (!response.ok){
+      throw new Error('Network Response was not ok');
+    }
+    return response.json();
+  }).then(data => {console.status(data)} ).catch(err => {
+    console.err
+    ('Error:', err);
+  })
+  status("Upload successful.")
+ }
 
 stopButton.addEventListener("click", stopRecordingOnClick, false);
 uploadButton.addEventListener("click", upload, false);

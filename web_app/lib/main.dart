@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -44,6 +45,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+/// A basic homepage state with butttons for naviating to the [ScanningPage] and [ViewModelPage]
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
@@ -105,14 +107,17 @@ class VideoPage extends StatefulWidget {
   _VideoPageState createState() => _VideoPageState();
 }
 
+/// Class definition for the Video Page
+/// Renders a local video asset using a [VideoPlayer] object
+/// Creates a set of buttons for controlling the playback state using a [VideoPlayerController]
 class _VideoPageState extends State<VideoPage> {
   late VideoPlayerController _playerController;
 
   @override
   void initState() {
-    super.initState();
     _playerController = VideoPlayerController.asset("videos/instructions.mp4")
       ..initialize().then((_) => {setState(() {})});
+    super.initState();
   }
 
   @override
@@ -141,13 +146,20 @@ class _VideoPageState extends State<VideoPage> {
               ),
             ),
             Expanded(
-              child: _playerController.value.isInitialized
-                  ? AspectRatio(
-                      aspectRatio: _playerController.value.aspectRatio,
-                      child: VideoPlayer(_playerController),
-                    )
-                  : Container(),
-            ),
+                child: _playerController.value.isInitialized
+                    ? AspectRatio(
+                        aspectRatio: _playerController.value.aspectRatio,
+                        child: VideoPlayer(_playerController),
+                      )
+                    : SizedBox(
+                        height: 100,
+                        width: 100,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 5,
+                          ),
+                        ),
+                      )),
             Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -223,7 +235,10 @@ class ScanningPage extends StatefulWidget {
   _ScanningPageState createState() => _ScanningPageState();
 }
 
+/// Class definition of the Scanning Page State
+/// Creates an application state that renders a webpage using [InAppWebView] from the flutter_inappwebview package
 class _ScanningPageState extends State<ScanningPage> {
+  // Builds the Web View widget.
   InAppWebView createWebView() {
     return InAppWebView(
       onWebViewCreated: (controller) {},
@@ -231,7 +246,7 @@ class _ScanningPageState extends State<ScanningPage> {
       initialUserScripts: UnmodifiableListView<UserScript>(
         [
           UserScript(
-            source: 'web/ScannerApp.js',
+            source: 'web/scannerapp.js',
             injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
           )
         ],
@@ -248,9 +263,11 @@ class _ScanningPageState extends State<ScanningPage> {
     );
   }
 
+  // An asynchronous fuction that delays the creation of the web view.
   Future<InAppWebView> callAsyncWebView() async =>
-      await Future.delayed(Duration(seconds: 3), () => createWebView());
+      await Future.delayed(Duration(seconds: 7), () => createWebView());
 
+// Shows a dialogue prompt on startup to quickly tell the user how the scanning page works
   @override
   void initState() {
     super.initState();
@@ -343,9 +360,16 @@ Recording can be stopped at any time using the "Stop Recording" Button.
                 clipBehavior: Clip.hardEdge,
                 decoration: defaultBoxDecoration(),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [],
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.popUntil(
+                          context, (Route<dynamic> route) => route.isFirst),
+                      icon: Icon(Icons.home),
+                      color: Colors.white,
+                    ),
+                  ],
                 ),
               ),
             ]),
@@ -363,17 +387,30 @@ class ViewModelPage extends StatefulWidget {
   _ViewModelPageState createState() => _ViewModelPageState();
 }
 
+/// Class definiion for the View Model Page State
+/// Builds an application state that renders a 3D model using a [Cube] and [Scene] from the flutter_cube package
+/// [ElevatedButton] labeled "View Model Data" calls [showDialog] and presents the 3D model's extracted data
 class _ViewModelPageState extends State<ViewModelPage> {
   late Object model;
+  late List<List<dynamic>>? modelData;
+
+  Future<List<List<dynamic>>> processCSV() async {
+    var result = await DefaultAssetBundle.of(context).loadString(
+      "model/measurements.csv",
+    );
+    return const CsvToListConverter().convert(result, eol: "\n");
+  }
 
   @override
   void initState() {
-    model = 
+    model = Object(fileName: "model/mesh.obj");
+    super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey,
+      backgroundColor: Colors.black,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -389,34 +426,77 @@ class _ViewModelPageState extends State<ViewModelPage> {
                   color: Colors.white),
             ),
             // Model viewer environment placeholder
-            Expanded(
-              child: Cube(),
-            ),
+            Expanded(child: Cube(onSceneCreated: (Scene scene) {
+              scene.world.add(model);
+              scene.camera.zoom = 5;
+            })),
             Container(
               alignment: Alignment.center,
               padding: EdgeInsets.all(10),
               clipBehavior: Clip.hardEdge,
               decoration: defaultBoxDecoration(),
-              child: ElevatedButton(
-                child: const Text('Start'),
-                onPressed: () async {
-                  await showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) => new AlertDialog(
-                            title: new Text("Work In Progress View"),
-                            icon: Icon(Icons.warning, color: Colors.black),
-                            content: new Text(
-                                "Model Viewer is currently under development! Thank you for your patience!"),
-                            actions: <Widget>[
-                              TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: new Text("OK"))
-                            ],
-                          ));
-                },
-                style: Theme.of(context).textButtonTheme.style,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.popUntil(
+                        context, (Route<dynamic> route) => route.isFirst),
+                    icon: Icon(Icons.home),
+                    color: Colors.white,
+                  ),
+                  ElevatedButton(
+                    child: const Text('View Model Data'),
+                    onPressed: () async {
+                      modelData = await processCSV();
+                      await showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) => new AlertDialog(
+                                title:
+                                    new Text("Model Data (in Computer Units)"),
+                                icon:
+                                    Icon(Icons.data_array, color: Colors.black),
+                                content: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: modelData == null
+                                      ? const CircularProgressIndicator()
+                                      : DataTable(
+                                          columns: modelData![0]
+                                              .map(
+                                                (item) => DataColumn(
+                                                  label: Text(
+                                                    item.toString(),
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(),
+                                          rows: modelData!
+                                              .map(
+                                                (dataRow) => DataRow(
+                                                  cells: dataRow
+                                                      .map(
+                                                        (item) => DataCell(
+                                                          Text(
+                                                            item.toString(),
+                                                          ),
+                                                        ),
+                                                      )
+                                                      .toList(),
+                                                ),
+                                              )
+                                              .toList(),
+                                        ),
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: new Text("OK"))
+                                ],
+                              ));
+                    },
+                    style: Theme.of(context).textButtonTheme.style,
+                  ),
+                ],
               ),
             ),
           ],

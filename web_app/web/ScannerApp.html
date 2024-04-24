@@ -5,55 +5,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script defer>var exports = {};</script>
-  <script type="module" src="scannerapp.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js" crossorigin="anonymous"></script>
+  <script type="module" src="./scannerapp.js"></script>
+  <link href="./style.css" rel="stylesheet">
+  </link>
   <title>HTML Render of Scanning Environment</title>
-  <style>
-    html,
-    body {
-      margin: 0;
-      height: 100%;
-      /* overflow: hidden; */
-      text-align: center;
-    }
-
-    .video-container {
-      display: inline-block;
-      height: fit-content;
-      width: fit-content;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    video {
-      position: absolute;
-      z-index: 1;
-    }
-
-    canvas {
-      position: relative;
-      z-index: 20;
-    }
-  </style>
 </head>
 
 <body>
-  <div id="liveView" class="videoView">
-    <div class="video-container">
-      <video id="webcam" width="480" height="360" autoplay></video>
-      <canvas class="output_canvas, center" id="output_canvas" width="480" height="360"></canvas>
-    </div>
+  <div class="content">
+  <div class="image-wrapper">
+    <div class="overlay"><img src="tposer.png" id="tposeman"></div>
+    <video id="webcam" autoplay playsinline></video>
+    <canvas class="output_canvas" id="output_canvas" width="1280" height="720"></canvas>
   </div>
-  <div>
+  <div id="scan-button-row">
     <button id="recordBtn">Start Recording</button>
-    <a id="uploadBtn">Upload/Download Recording</a>
-  </div>
-  <div>
     <button id="callibrationBtn">Start Callibration</button>
     <button id="stopBtn">Stop Recording</button>
-    <div>
-
-    </div>
+  </div>
+  <div id="upload-row">
+    <button id="uploadBtn">Upload Recording</button>
+    <a id="downloadBtn">Download Recording</a>
+  </div>
+  <div id="status"></div>
+  </div>
 </body>
 
 </html>
